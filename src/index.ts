@@ -7,6 +7,10 @@ const app = express()
 // Load environment variables from .env file
 dotenv.config()
 
+// Set the port to listen on
+const configurationPort = Number(process.env.EXPRESS_PORT)
+const port = !isNaN(configurationPort) ? configurationPort : 3000
+
 // Middleware to parse the request body to JSON
 app.use(express.json())
 
@@ -16,6 +20,6 @@ app.get('/', (_req, res) => {
 })
 
 // Start the server
-app.listen(process.env.EXPRESS_PORT, () => {
-  console.log(`Server running on http://localhost:${process.env.EXPRESS_PORT}`)
+app.listen(port, () => {
+  console.log(`Server running on http://localhost:${port}`)
 })
