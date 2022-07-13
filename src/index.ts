@@ -1,10 +1,11 @@
 import express from 'express'
+import dotenv from 'dotenv'
 
-// Initialize an express application
+// Initialize an Express application
 const app = express()
 
-// Set the port to listen on
-const PORT = 3000
+// Load environment variables from .env file
+dotenv.config()
 
 // Middleware to parse the request body to JSON
 app.use(express.json())
@@ -15,6 +16,6 @@ app.get('/', (_req, res) => {
 })
 
 // Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.listen(process.env.EXPRESS_PORT, () => {
+  console.log(`Server running on http://localhost:${process.env.EXPRESS_PORT}`)
 })
