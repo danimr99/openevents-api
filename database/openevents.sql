@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `events` (
   `owner_id` int(11) DEFAULT NULL,
   `creation_date` datetime DEFAULT NULL,
   `image_url` varchar(100) DEFAULT NULL,
-  `format` int(11) NOT NULL DEFAULT 0 COMMENT '0: FACE-TO-FACE\n1: VIRTUAL\n',
+  `format` int(11) NOT NULL DEFAULT 0 COMMENT '0: FACE-TO-FACE\n1: ONLINE\n',
   `link` varchar(200) DEFAULT NULL,
   `location` varchar(100) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
@@ -49,10 +49,10 @@ CREATE TABLE IF NOT EXISTS `events` (
 -- --------------------------------------------------------
 
 --
--- Table: `friends`
+-- Table: `friendships`
 --
 
-CREATE TABLE IF NOT EXISTS `friends` (
+CREATE TABLE IF NOT EXISTS `friendships` (
   `user_id` int(11) NOT NULL,
   `friend_user_id` int(11) NOT NULL,
   `status` int(11) NOT NULL DEFAULT 0 COMMENT '0: REQUESTED\n1: ACCEPTED\n'
@@ -96,7 +96,7 @@ ALTER TABLE `events`
 --
 -- Indexes of the table: `friends`
 --
-ALTER TABLE `friends`
+ALTER TABLE `friendships`
   ADD PRIMARY KEY (`user_id`,`friend_user_id`);
 
 --
