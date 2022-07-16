@@ -17,3 +17,5 @@ export interface Event {
   ticket_price: number
   category: EventCategory
 }
+
+export type EventKey = keyof Event

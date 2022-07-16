@@ -5,3 +5,5 @@ export interface Friendship {
   friendUserId: number
   status: FriendshipStatus
 }
+
+export type FriendshipKey = keyof Friendship

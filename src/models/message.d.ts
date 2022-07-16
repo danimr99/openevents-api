@@ -5,3 +5,5 @@ export interface Message {
   content: string
   timestamp: Date
 }
+
+export type MessageKey = keyof Message

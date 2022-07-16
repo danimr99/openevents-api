@@ -1,13 +1,13 @@
 import { HttpStatusCode } from './http_status_code'
 
 export class ErrorAPI extends Error {
-  readonly status: HttpStatusCode
-  readonly stacktrace: any
+  httpStatusCode: HttpStatusCode
+  stacktrace: Object
 
-  constructor (message: string, status: HttpStatusCode, stacktrace: Object) {
+  constructor (message: string, httpStatusCode: HttpStatusCode, stacktrace: Object) {
     super(message)
 
-    this.status = status
+    this.httpStatusCode = httpStatusCode
     this.stacktrace = stacktrace
     Error.captureStackTrace(this)
   }

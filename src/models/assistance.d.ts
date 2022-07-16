@@ -4,3 +4,5 @@ export interface Assistance {
   rating: number
   comment: string
 }
+
+export type AssistanceKey = keyof Assistance
