@@ -1,8 +1,8 @@
-import { HttpStatusCode } from './http_status_code'
+import { HttpStatusCode } from '../enums/http_status_code'
 
 export class ErrorAPI extends Error {
-  httpStatusCode: HttpStatusCode
-  stacktrace: Object
+  public httpStatusCode: HttpStatusCode
+  public stacktrace: Object
 
   constructor (message: string, httpStatusCode: HttpStatusCode, stacktrace: Object) {
     super(message)

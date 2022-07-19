@@ -2,10 +2,10 @@ import { isEmailValid } from '@sideway/address'
 
 import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
 
-import { User, UserKey } from '../models/user'
+import { User, UserKey } from '../models/user/user'
 
 /**
- * Checks if a value is a {@link String}.
+ * Function that checks if a value is a {@link String}.
  * @param {any} string - String to check.
  * @returns {Boolean} True if the value is a string, false otherwise.
  */
@@ -14,8 +14,8 @@ export const isString = (string: any): boolean => {
 }
 
 /**
- * Checks if a value is a {@link String} and it is not empty
- * and not only contains blank spaces.
+ * Function that checks if a value is a {@link String}, if it is not empty
+ * and if it does not only contain blank spaces.
  * @param {any} string - String to check.
  * @returns {Boolean} True if string is valid, false otherwise.
  */
@@ -30,16 +30,16 @@ export const validateString = (string: any): boolean => {
 }
 
 /**
- * Checks if a value is a {@link Number}.
+ * Function that checks if a value is a {@link Number}.
  * @param {any} number - Value to check.
  * @returns {Boolean} True if the value is a number, false otherwise.
  */
 export const isNumber = (number: any): boolean => {
-  return !Number.isNaN(number)
+  return !Number.isNaN(number) && (typeof number === 'number' || number instanceof Number)
 }
 
 /**
- * Checks if a value is a {@link Date}.
+ * Function that checks if a value is a {@link Date}.
  * @param {any} date - Date to check.
  * @returns {Boolean} True if the date is valid, false otherwise.
  */
@@ -48,7 +48,16 @@ export const isDate = (date: any): boolean => {
 }
 
 /**
- * Checks if an email address is valid.
+ * Function that checks if a value is an {@link Object}.
+ * @param {any} object - Object to check.
+ * @returns {Boolean} True if the value is an object, false otherwise.
+ */
+export const isObject = (object: any): boolean => {
+  return typeof object === 'object' || object instanceof Object
+}
+
+/**
+ * Function that checks if an email address is valid.
  * @param {any} email - Email address to check.
  * @returns {Boolean} True if the email address is valid, false otherwise.
  */
@@ -61,7 +70,7 @@ export const validateEmail = (email: any): boolean => {
 }
 
 /**
- * Checks if a password is valid.
+ * Function that checks if a password is valid.
  * @param {any} password - Password to check.
  * @returns {Boolean} True if the password is valid, false otherwise.
  */
@@ -74,7 +83,7 @@ export const validatePassword = (password: any): boolean => {
 }
 
 /**
- * Checks if a {@link User} is valid.
+ * Function that checks if a {@link User} is valid.
  * @param {User} user - User to check.
  * @param {Boolean} areFieldsOptional - Flag to indicate whether all user fields are required or not.
  * @returns {string[]} List of invalid user fields. If list is empty, user is valid.
@@ -116,7 +125,7 @@ export const validateUser = (user: User, areFieldsOptional: boolean): string[] =
 }
 
 /**
- * Checks if an event rating is valid.
+ * Function that checks if an event rating is valid.
  * @param {any} rating - Event rating to check.
  * @returns {Boolean} True if the event rating is a number and it is between min and max values, false otherwise.
  */

@@ -1,25 +1,22 @@
-import express from 'express'
-import dotenv from 'dotenv'
+import express, { NextFunction, Request, Response } from 'express'
 import morgan from 'morgan'
 import helmet from 'helmet'
 
-import { ErrorAPI } from './models/error_api'
-import { HttpStatusCode } from './models/http_status_code'
 import { getServerPort } from './constants'
 
-import userRouter from './routes/users.routes'
-import eventRouter from './routes/events.routes'
-import assistanceRouter from './routes/assistances.routes'
-import messageRouter from './routes/messages.routes'
-import friendshipRouter from './routes/friendships.routes'
+import { ErrorAPI } from './models/error/error_api'
+import { HttpStatusCode } from './models/enums/http_status_code'
+
+import userRouter from './routes/user_routes'
+import eventRouter from './routes/event_routes'
+import assistanceRouter from './routes/assistance_routes'
+import messageRouter from './routes/message_routes'
+import friendshipRouter from './routes/friendship_routes'
 
 import { errorHandler } from './middlewares/error_handler'
 
 // Initialize an Express application
 const app = express()
-
-// Load environment variables from .env file
-dotenv.config()
 
 // Set the port to listen on
 const port = getServerPort()
@@ -39,7 +36,7 @@ app.use('/messages', messageRouter)
 app.use('/friendships', friendshipRouter)
 
 // Default endpoint for unknown requests
-app.all('*', (req, _res, next) => {
+app.all('*', (req: Request, _res: Response, next: NextFunction) => {
   const stacktrace = {
     http_method: req.method,
     endpoint: req.originalUrl

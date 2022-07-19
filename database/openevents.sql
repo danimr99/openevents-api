@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS `events` (
   `creation_date` datetime DEFAULT NULL,
   `image_url` varchar(100) DEFAULT NULL,
   `format` int(11) NOT NULL DEFAULT 0 COMMENT '0: FACE-TO-FACE\n1: ONLINE\n',
-  `link` varchar(200) DEFAULT NULL,
-  `location` varchar(100) DEFAULT NULL,
+  `link` varchar(300) DEFAULT NULL,
+  `location` varchar(200) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
@@ -80,11 +80,11 @@ CREATE TABLE IF NOT EXISTS `messages` (
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `last_name` varchar(100) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(250) DEFAULT NULL,
-  `image_url` varchar(200) NOT NULL
+  `name` varchar(200) DEFAULT NULL,
+  `last_name` varchar(200) DEFAULT NULL,
+  `email` varchar(200) DEFAULT NULL,
+  `password` varchar(300) DEFAULT NULL,
+  `image_url` varchar(300) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

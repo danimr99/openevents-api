@@ -1,12 +1,18 @@
+import dotenv from 'dotenv'
+
+// Load environment variables from .env file
+dotenv.config()
+
+// Default values
 const DEFAULT_SERVER_PORT = 3000
 const DEFAULT_MIN_PASSWORD_LENGTH = 8
 const DEFAULT_MIN_EVENT_RATING = 0
 const DEFAULT_MAX_EVENT_RATING = 10
 
 /**
- * Gets the port to start server from the .env configuration file.
+ * Function that gets the port to start server from the .env configuration file.
  * If an error occurs, assigns a default server port ({@link DEFAULT_SERVER_PORT}).
- * @returns Number of the server port to listen.
+ * @returns {number} Server port to listen.
  */
 export const getServerPort = (): number => {
   // Get server port from .env configuration file
@@ -16,9 +22,9 @@ export const getServerPort = (): number => {
 }
 
 /**
- * Gets the minimum password length from the .env configuration file.
+ * Function that gets the minimum password length from the .env configuration file.
  * If an error occurs, assigns a default password length ({@link DEFAULT_MIN_PASSWORD_LENGTH}).
- * @returns Minimum password length.
+ * @returns {number} Minimum password length.
  */
 export const getMinimumPasswordLength = (): number => {
   // Get minimum password length from .env configuration file
@@ -28,10 +34,10 @@ export const getMinimumPasswordLength = (): number => {
 }
 
 /**
- * Gets the minimum event rating value from the .env configuration file.
+ * Function that gets the minimum event rating value from the .env configuration file.
  * If an error occurs, assigns a default minimum event rating value
  * ({@link DEFAULT_MIN_EVENT_RATING}).
- * @returns Minimum event rating value.
+ * @returns {number} Minimum event rating value.
  */
 export const getMinimumEventRatingValue = (): number => {
   // Get minimum event rating value from .env configuration file
@@ -41,10 +47,10 @@ export const getMinimumEventRatingValue = (): number => {
 }
 
 /**
- * Gets the maximum event rating value from the .env configuration file.
+ * Function that gets the maximum event rating value from the .env configuration file.
  * If an error occurs, assigns a default maximum event rating value
  * ({@link DEFAULT_MAX_EVENT_RATING}).
- * @returns Maximum event rating value.
+ * @returns {number} Maximum event rating value.
  */
 export const getMaximumEventRatingValue = (): number => {
   // Get maximum event rating value from .env configuration file

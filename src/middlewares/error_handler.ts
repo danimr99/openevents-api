@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { ErrorAPI } from '../models/error_api'
-import { HttpStatusCode } from '../models/http_status_code'
+import { ErrorAPI } from '../models/error/error_api'
+import { HttpStatusCode } from '../models/enums/http_status_code'
+
 import { isNumber } from '../utils/validator'
 
 /**
@@ -18,8 +19,7 @@ export const errorHandler = (error: ErrorAPI, _req: Request, res: Response, _nex
     : HttpStatusCode.INTERNAL_SERVER_ERROR
 
   // Send error response
-  res.header('Content-Type', 'application/json')
-  res.status(httpStatusCode).send({
+  res.status(httpStatusCode).json({
     error: error.message,
     http_status_code: httpStatusCode,
     stacktrace: error.stacktrace
