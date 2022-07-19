@@ -1,11 +1,17 @@
 import express, { NextFunction, Request, Response } from 'express'
 
-import { User } from '../models/user/user'
+import { User, UserCredentials } from '../models/user/user'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
+import { APIMessage } from '../models/enums/api_messages'
+import { DatabaseMessage } from '../models/enums/database_messages'
 
-import { createUser, existsUserByEmail, parseAllUser } from '../controllers/user_controller'
-import { APIMessage, DatabaseMessage } from '../models/enums/messages'
+import { parseAllUser, parseCredentials } from '../middlewares/parser'
+
+import { createUser, existsUserByEmail, getUsersByEmail } from '../controllers/user_controller'
+
+import { checkPassword } from '../utils/cypher'
+import { generateAuthenticationToken } from '../utils/authentication'
 
 // Create a router for users
 const router = express.Router()
@@ -71,6 +77,62 @@ router.post('/', parseAllUser, async (_req: Request, res: Response, next: NextFu
           )
         )
       })
+  }
+})
+
+/**
+ * Route that authenticates a {@link User}.
+ * HTTP Method: POST
+ * Endpoint: "/users/login"
+ */
+router.post('/login', parseCredentials, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get parsed user credentials
+  const credentials: UserCredentials = res.locals.PARSED_USER_CREDENTIALS
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: credentials
+  }
+
+  // Get list of users with the same email address
+  const users = await getUsersByEmail(credentials.email)
+
+  // Check if only exists a user with the specified email addres
+  if (users.length === 1) {
+    // Get password hash from the database
+    const userPasswordHash = users[0].password
+
+    // Validate specified password for the user queried from database
+    const validPassword = await checkPassword(credentials.password, userPasswordHash)
+
+    // Check if password is valid
+    if (validPassword) {
+      // Generate an authentication token
+      const authenticationToken = generateAuthenticationToken(users[0])
+
+      // Send response
+      res.status(HttpStatusCode.OK).json({
+        bearer_token: authenticationToken
+      })
+    } else {
+      // Invalid credentials
+      next(
+        new ErrorAPI(
+          APIMessage.INVALID_CREDENTIALS,
+          HttpStatusCode.BAD_REQUEST,
+          stacktrace
+        )
+      )
+    }
+  } else {
+    // Exists multiple users with the same email address
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_MULTIPLE_USERS_SAME_EMAIL,
+        HttpStatusCode.INTERNAL_SERVER_ERROR,
+        stacktrace
+      )
+    )
   }
 })
 

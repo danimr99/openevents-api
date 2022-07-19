@@ -1,0 +1,137 @@
+openapi: '3.0.3'
+info:
+  title: OpenEvents
+  description: An Express API for OpenEvents
+  contact:
+    email: danimr1999@gmail.com
+    name: Daniel Muelle Ramos
+  license:
+    name: MIT
+    url: https://www.mit.edu/~amini/LICENSE.md
+  version: 1.0.0
+servers:
+- url: http://localhost:3000/
+  description: Development
+paths:
+  /users:
+    post:
+      tags:
+      - users
+      summary: Creates a user.
+      description: Inserts into database the user received from the request body in JSON format.
+      security: []
+      requestBody:
+        description: User information in JSON format.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              items:
+                required: 
+                  - name
+                  - last_name
+                  - email
+                  - password
+                  - image_url
+              properties:
+                name:
+                  description: The name to assign to the user
+                  type: string
+                  example: "Jane"
+                last_name:
+                  description: The last name to assign to the user
+                  type: string
+                  example: "Doe"
+                email:
+                  description: The email address to assign to the user
+                  type: string
+                  example: "janedoe@openevents.com"
+                password:
+                  description: The password to assign to the user
+                  type: string
+                  example: "password123"
+                image_url:
+                  description: Path to image to assign to the user
+                  type: string
+                  example: "https://i.imgur.com/ghy8Xx1.png"
+      responses:
+        "201":
+          description: User created.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  required:
+                  - name
+                  - last_name
+                  - email
+                  - password
+                  - image_url
+                properties:
+                  name:
+                    type: string
+                    example: "Jane"
+                  last_name:
+                    type: string
+                    example: "Doe"
+                  email:
+                    type: string
+                    example: "janedoe@openevents.com"
+                  image_url:
+                    type: string
+                    example: "https://i.imgur.com/ghy8Xx1.png"
+        "400":
+          description: Already exists a user with the same email address as the specified or any of the user fields is missing or does not meet the requirements to be considered as valid.
+          
+  /users/login:
+        post:
+          tags:
+          - users
+          summary: Authenticates a user.
+          description: Checks whether credentials are valid or not. If credentials are valid, generates an authentication token.
+          security: []
+          requestBody:
+            description: Email address and password of the user to be authenticated in JSON format.
+            required: true
+            content:
+              application/json:
+                schema:
+                  type: object
+                  items:
+                    required: 
+                      - email
+                      - password
+                  properties:
+                    email:
+                      description: The email address to assign to the user
+                      type: string
+                      example: "janedoe@openevents.com"
+                    password:
+                      description: The password to assign to the user
+                      type: string
+                      example: "password123"
+          responses:
+            "200":
+              description: User authenticated.
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    items:
+                      required:
+                      - auth_token
+                    properties:
+                      auth_token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4"
+            "400":
+              description: Invalid credentials or any of the credentials fields is missing or does not meet the requirements to be considered as valid.
+          
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  

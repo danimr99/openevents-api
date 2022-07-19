@@ -2,7 +2,7 @@ import { isEmailValid } from '@sideway/address'
 
 import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
 
-import { User, UserKey } from '../models/user/user'
+import { User, UserCredentials, UserKey } from '../models/user/user'
 
 /**
  * Function that checks if a value is a {@link String}.
@@ -119,6 +119,30 @@ export const validateUser = (user: User, areFieldsOptional: boolean): string[] =
       // Check if value of the user property is fulfilled
       return !(user[property] === undefined)
     })
+  }
+
+  return invalidFields
+}
+
+/**
+ * Function that checks if a {@link UserCredentials} is valid.
+ * @param {UserCredentials} credentials - Credentials to check.
+ * @returns {string[]} List of invalid credential fields. If list is empty, credentials are valid.
+ */
+export const validateCredentials = (credentials: UserCredentials): string[] => {
+  const invalidFields: string[] = []
+
+  // Iterate through each key - value pair
+  for (const [key, value] of Object.entries(credentials)) {
+    // Fill the list of invalid fields if it is not for each value
+    switch (key) {
+      case 'email':
+        if (!validateEmail(value)) invalidFields.push(key)
+        break
+      case 'password':
+        if (!validatePassword(value)) invalidFields.push(key)
+        break
+    }
   }
 
   return invalidFields

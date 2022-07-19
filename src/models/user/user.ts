@@ -10,4 +10,6 @@ export interface UserWithId extends User {
   id: number
 }
 
+export type UserCredentials = Omit<User, 'name' | 'last_name' | 'image_url'>
+
 export type UserKey = keyof User
