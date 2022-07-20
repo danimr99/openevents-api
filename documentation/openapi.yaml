@@ -121,9 +121,9 @@ paths:
                     type: object
                     items:
                       required:
-                      - auth_token
+                      - bearer_token
                     properties:
-                      auth_token:
+                      bearer_token:
                         type: string
                         example: "eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4"
             "400":

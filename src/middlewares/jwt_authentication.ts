@@ -1,16 +1,16 @@
 import { Request, Response, NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 
+import { APIMessage } from '../models/enums/api_messages'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
 
 import { getJWTPrivateKey } from '../utils/authentication'
-import { isObject } from '../utils/validator'
 
-import { getUserById } from '../controllers/user_controller'
+import { existsUserByID } from '../controllers/user_controller'
 
 const authenticationError = new ErrorAPI(
-  'Invalid authentication token or not registered user',
+  APIMessage.ERROR_INVALID_AUTHENTICATION_JWT,
   HttpStatusCode.UNAUTHORIZED,
   {}
 )
@@ -21,7 +21,7 @@ const authenticationError = new ErrorAPI(
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
-export const authenticateJWT = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const authenticateJWT = (req: Request, res: Response, next: NextFunction): void => {
   // Check if exists authentication JWT on HTTP request header
   if (req.headers.authorization == null || req.headers.authorization === undefined) {
     next(authenticationError)
@@ -34,17 +34,21 @@ export const authenticateJWT = async (req: Request, res: Response, next: NextFun
 
     try {
       // Verify token and get payload
-      const decoded = JSON.parse(JSON.stringify(jwt.verify(token, getJWTPrivateKey())))
+      const decodedJWT = JSON.parse(JSON.stringify(jwt.verify(token, getJWTPrivateKey())))
 
-      // Get the user who is the owner of the access token
-      await getUserById(decoded.id).then((user) => {
-        // Check if exists a user with the ID from the received JWT
-        if (!isObject(user)) next(authenticationError)
-
-        // Pass user ID to the next middleware
-        res.locals.PARSED_USER_CREDENTIALS = user.id
-        next()
-      })
+      // Check if exists the user owner of the JWT
+      void Promise<boolean>.resolve(
+        existsUserByID(decodedJWT.id).then((userExists) => {
+          // Check if exists a user with the ID from the received JWT
+          if (userExists) {
+            // Pass user ID to the next middleware
+            res.locals.PARSED_USER_CREDENTIALS = decodedJWT.id
+            next()
+          } else {
+            next(authenticationError)
+          }
+        })
+      )
     } catch (error) {
       next(authenticationError)
     }

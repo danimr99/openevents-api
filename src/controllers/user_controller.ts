@@ -18,9 +18,9 @@ export const getUsersByEmail = async (email: string = ''): Promise<UserWithId[]>
 /**
  * Function to get all the users by ID.
  * @param {number} id - ID to search.
- * @returns {Promise<UserWithId[]>} User by ID.
+ * @returns {Promise<UserWithId[]>} List of users by ID.
  */
-export const getUserById = async (id: number): Promise<UserWithId> => {
+export const getUsersById = async (id: number): Promise<UserWithId[]> => {
   return await userDAO.getUserById(id).then((result) => result)
 }
 
@@ -55,12 +55,12 @@ export const existsUserByEmail = async (email: string = ''): Promise<boolean> =>
 export const existsUserByID = async (id: number): Promise<boolean> => {
   if (isNumber(id)) {
     // Get user by id
-    const user = await getUserById(id)
+    const usersList = await getUsersById(id)
 
     // Check if user has data
-    if (isObject(user)) {
+    if (isObject(usersList) && usersList.length > 0) {
       // Check if ID matches
-      return user.id === id
+      return usersList[0].id === id
     }
   }
 

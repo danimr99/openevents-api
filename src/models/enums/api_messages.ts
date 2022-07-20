@@ -1,5 +1,6 @@
 export enum APIMessage {
   ERROR_REQUEST_BODY_FORMAT = 'Data from the request body must be a valid JSON',
+  ERROR_INVALID_AUTHENTICATION_JWT = 'Invalid authentication token or not registered user',
   ERROR_INVALID_STRING_FIELD = 'Must be a non-empty string',
   ERROR_INVALID_PASSWORD_FIELD_I = 'Must be a non-empty string of at least',
   ERROR_INVALID_PASSWORD_FIELD_II = 'characters long',

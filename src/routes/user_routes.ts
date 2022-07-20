@@ -12,6 +12,7 @@ import { createUser, existsUserByEmail, getUsersByEmail } from '../controllers/u
 
 import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
+import { authenticateJWT } from '../middlewares/jwt_authentication'
 
 // Create a router for users
 const router = express.Router()
@@ -124,6 +125,15 @@ router.post('/login', parseCredentials, async (_req: Request, res: Response, nex
         )
       )
     }
+  } else if (users.length === 0) {
+    // User does not exist
+    next(
+      new ErrorAPI(
+        APIMessage.INVALID_CREDENTIALS,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
   } else {
     // Exists multiple users with the same email address
     next(
@@ -134,6 +144,12 @@ router.post('/login', parseCredentials, async (_req: Request, res: Response, nex
       )
     )
   }
+})
+
+router.get('/', authenticateJWT, (_req: Request, res: Response, _next: NextFunction) => {
+  res.status(HttpStatusCode.OK).json({
+    ok: 'Successful'
+  })
 })
 
 export default router

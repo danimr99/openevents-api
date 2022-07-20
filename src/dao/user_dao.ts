@@ -28,12 +28,12 @@ export class UserDAO {
   /**
    * Function to get a list of {@link User}s by ID from the database.
    * @param {number} id - ID to search.
-   * @returns {Promise<UserWithId[]>} User with the specified ID.
+   * @returns {Promise<UserWithId[]>} List of users with the specified ID.
    */
-  async getUserById (id: number): Promise<UserWithId> {
-    let result: UserWithId
+  async getUserById (id: number): Promise<UserWithId[]> {
+    let result: UserWithId[]
 
-    return await Promise<UserWithId>.resolve(
+    return await Promise<UserWithId[]>.resolve(
       // Query to database
       databaseConnection.promise().query(
         'SELECT * FROM users WHERE id = ?',
