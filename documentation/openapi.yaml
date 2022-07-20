@@ -26,62 +26,14 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              items:
-                required: 
-                  - name
-                  - last_name
-                  - email
-                  - password
-                  - image_url
-              properties:
-                name:
-                  description: The name to assign to the user
-                  type: string
-                  example: "Jane"
-                last_name:
-                  description: The last name to assign to the user
-                  type: string
-                  example: "Doe"
-                email:
-                  description: The email address to assign to the user
-                  type: string
-                  example: "janedoe@openevents.com"
-                password:
-                  description: The password to assign to the user
-                  type: string
-                  example: "password123"
-                image_url:
-                  description: Path to image to assign to the user
-                  type: string
-                  example: "https://i.imgur.com/ghy8Xx1.png"
+               $ref: '#/components/schemas/RequestUser'
       responses:
         "201":
           description: User created.
           content:
             application/json:
               schema:
-                type: object
-                items:
-                  required:
-                  - name
-                  - last_name
-                  - email
-                  - password
-                  - image_url
-                properties:
-                  name:
-                    type: string
-                    example: "Jane"
-                  last_name:
-                    type: string
-                    example: "Doe"
-                  email:
-                    type: string
-                    example: "janedoe@openevents.com"
-                  image_url:
-                    type: string
-                    example: "https://i.imgur.com/ghy8Xx1.png"
+                $ref: '#/components/schemas/ResponseUser'
         "400":
           description: Already exists a user with the same email address as the specified or any of the user fields is missing or does not meet the requirements to be considered as valid.
     get:
@@ -97,25 +49,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: number
-                      example: 1
-                    name:
-                      type: string
-                      example: "Jane"
-                    last_name:
-                      type: string
-                      example: "Doe"
-                    email:
-                      type: string
-                      example: "janedoe@openevents.com"
-                    image_url:
-                      type: string
-                      example: "https://i.imgur.com/ghy8Xx1.png"
+                $ref: '#/components/schemas/ResponseListUserWithId'
           
   /users/login:
         post:
@@ -160,10 +94,118 @@ paths:
                         example: "eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4"
             "400":
               description: Invalid credentials or any of the credentials fields is missing or does not meet the requirements to be considered as valid.
-
+              
+  /users/{user_id}:
+      get:
+        tags:
+          - users
+        summary: Gets a user by ID.
+        description: Gets a user by ID including the encrypted password.
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the user to get
+        responses:
+          "200":
+              description: User by ID.
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ResponseUserWithId'
+            
 components:
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
-  
+  schemas:
+    RequestUser:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the user
+          example: "Jane"
+        last_name:
+          type: string
+          description: Last name of the user
+          example: "Doe"
+        email:
+          type: string
+          description: Email address of the user
+          example: "janedoe@openevents.com"
+        password:
+          type: string
+          description: Password of the user
+          example: "password"
+        image_url:
+          type: string
+          description: Link URL of the profile image of the user
+          example: "https://i.imgur.com/ghy8Xx1.png"
+    ResponseUser:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the user
+          example: "Jane"
+        last_name:
+          type: string
+          description: Last name of the user
+          example: "Doe"
+        email:
+          type: string
+          description: Email address of the user
+          example: "janedoe@openevents.com"
+        image_url:
+          type: string
+          description: Link URL of the profile image of the user
+          example: "https://i.imgur.com/ghy8Xx1.png"
+    ResponseUserWithId:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the user
+          example: "Jane"
+        last_name:
+          type: string
+          description: Last name of the user
+          example: "Doe"
+        email:
+          type: string
+          description: Email address of the user
+          example: "janedoe@openevents.com"
+        password:
+          type: string
+          description: Password of the user encrypted
+          example: "$2b$10$EcKa.b$10$EcKacncGCugnWVb0b$10$EcKaZ75td7D./4UrSugnWZru"
+        image_url:
+          type: string
+          description: Link URL of the profile image of the user
+          example: "https://i.imgur.com/ghy8Xx1.png"
+    ResponseListUserWithId:
+      type: array
+      items:
+        type: object
+        properties:
+            id:
+              type: number
+              example: 1
+            name:
+              type: string
+              example: "Jane"
+            last_name:
+              type: string
+              example: "Doe"
+            email:
+              type: string
+              example: "janedoe@openevents.com"
+            image_url:
+              type: string
+              example: "https://i.imgur.com/ghy8Xx1.png"
