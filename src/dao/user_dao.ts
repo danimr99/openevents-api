@@ -1,4 +1,4 @@
-import { User, UserWithId } from '../models/user/user'
+import { PublicUser, User, UserWithId } from '../models/user/user'
 
 import { databaseConnection } from '../utils/database'
 import { encryptPassword } from '../utils/cypher'
@@ -60,6 +60,25 @@ export class UserDAO {
         'INSERT INTO users (name, last_name, email, password, image_url) VALUES (?, ?, ?, ?, ?)',
         [user.name, user.last_name, user.email, encryptedPassword, user.image_url]
       )
+    )
+  }
+
+  /**
+   * Function to get all the {@link PublicUser} from the database.
+   * @returns {Promise<PublicUser[]>} List of all users without their password.
+   */
+  async getAllUsers (): Promise<PublicUser[]> {
+    let result: PublicUser[]
+
+    return await Promise<PublicUser[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT id, name, last_name, email, image_url FROM users'
+      ).then(([rows]) => {
+        // Convert from database result object to user
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
     )
   }
 }

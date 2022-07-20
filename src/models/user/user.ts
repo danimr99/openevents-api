@@ -12,4 +12,6 @@ export interface UserWithId extends User {
 
 export type UserCredentials = Omit<User, 'name' | 'last_name' | 'image_url'>
 
+export type PublicUser = Omit<UserWithId, 'password'>
+
 export type UserKey = keyof User

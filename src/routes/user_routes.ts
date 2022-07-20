@@ -6,13 +6,14 @@ import { ErrorAPI } from '../models/error/error_api'
 import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
+import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parseCredentials } from '../middlewares/parser'
 
-import { createUser, existsUserByEmail, getUsersByEmail } from '../controllers/user_controller'
+import { createUser, existsUserByEmail, getAllUsers, getUsersByEmail } from '../controllers/user_controller'
 
 import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
-import { authenticateJWT } from '../middlewares/jwt_authentication'
+import { formatErrorSQL } from '../utils/database'
 
 // Create a router for users
 const router = express.Router()
@@ -36,7 +37,7 @@ router.post('/', parseAllUser, async (_req: Request, res: Response, next: NextFu
     .then((result) => result)
     .catch((error) => {
       // Add thrown error to stacktrace
-      stacktrace.error_sql = error
+      stacktrace.error_sql = formatErrorSQL(error)
 
       next(
         new ErrorAPI(
@@ -68,7 +69,7 @@ router.post('/', parseAllUser, async (_req: Request, res: Response, next: NextFu
         res.status(HttpStatusCode.CREATED).json(displayableUser)
       }).catch((error) => {
         // Add thrown error to stacktrace
-        stacktrace.error_sql = error
+        stacktrace.error_sql = formatErrorSQL(error)
 
         next(
           new ErrorAPI(
@@ -146,10 +147,30 @@ router.post('/login', parseCredentials, async (_req: Request, res: Response, nex
   }
 })
 
-router.get('/', authenticateJWT, (_req: Request, res: Response, _next: NextFunction) => {
-  res.status(HttpStatusCode.OK).json({
-    ok: 'Successful'
-  })
+/**
+ * Route that gets all {@link User}s.
+ * HTTP Method: GET
+ * Endpoint: "/users"
+ */
+router.get('/', authenticateJWT, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get all users from database
+  await getAllUsers()
+    .then((users) => {
+      res.status(HttpStatusCode.OK).json(users)
+    }).catch((error) => {
+      // Create stacktrace
+      const stacktrace: any = {
+        error_sql: formatErrorSQL(error)
+      }
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_SELECT_ALL_USERS,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
 })
 
 export default router

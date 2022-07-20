@@ -24,3 +24,15 @@ export const getDatabaseInformation = (): object => {
  * Database connection.
  */
 export const databaseConnection = mysql.createConnection(getDatabaseInformation())
+
+/**
+ * Function to delete SQL error fields.
+ * @param {any} error - SQL error thrown.
+ * @returns {any} Error with the desired fields to show.
+ */
+export const formatErrorSQL = (error: any): any => {
+  delete error.sql
+  delete error.sqlMessage
+
+  return error
+}

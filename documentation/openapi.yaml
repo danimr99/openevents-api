@@ -84,6 +84,38 @@ paths:
                     example: "https://i.imgur.com/ghy8Xx1.png"
         "400":
           description: Already exists a user with the same email address as the specified or any of the user fields is missing or does not meet the requirements to be considered as valid.
+    get:
+      tags:
+      - users
+      summary: Gets all users.
+      description: Gets all users from the database without their password.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of all users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 1
+                    name:
+                      type: string
+                      example: "Jane"
+                    last_name:
+                      type: string
+                      example: "Doe"
+                    email:
+                      type: string
+                      example: "janedoe@openevents.com"
+                    image_url:
+                      type: string
+                      example: "https://i.imgur.com/ghy8Xx1.png"
           
   /users/login:
         post:
@@ -111,7 +143,7 @@ paths:
                     password:
                       description: The password to assign to the user
                       type: string
-                      example: "password123"
+                      example: "password"
           responses:
             "200":
               description: User authenticated.
@@ -128,7 +160,7 @@ paths:
                         example: "eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4"
             "400":
               description: Invalid credentials or any of the credentials fields is missing or does not meet the requirements to be considered as valid.
-          
+
 components:
   securitySchemes:
     BearerAuth:

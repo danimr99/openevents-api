@@ -1,4 +1,4 @@
-import { User, UserWithId } from '../models/user/user'
+import { PublicUser, User, UserWithId } from '../models/user/user'
 
 import { UserDAO } from '../dao/user_dao'
 
@@ -76,4 +76,12 @@ export const createUser = async (user: Required<User>): Promise<void> => {
     // Insert user into database
     await userDAO.insertUser(user)
   }
+}
+
+/**
+ * Function to get all the {@link PublicUser}s from the database.
+ * @returns {Promise<PublicUser[]>} List of all the users without their password.
+ */
+export const getAllUsers = async (): Promise<PublicUser[]> => {
+  return await userDAO.getAllUsers().then((result) => result)
 }
