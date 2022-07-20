@@ -192,6 +192,9 @@ router.get('/:user_id', authenticateJWT, async (req: Request, res: Response, nex
 
   // Check if user ID is a number
   if (!isNumber(userId)) {
+    // Set the user ID received
+    stacktrace._original.user_id = req.params.user_id
+
     next(
       new ErrorAPI(
         APIMessage.INVALID_USER_ID,
@@ -211,7 +214,7 @@ router.get('/:user_id', authenticateJWT, async (req: Request, res: Response, nex
         // Send response
         res.status(HttpStatusCode.OK).json(user)
       } else {
-      // User not found or does not exist
+        // User not found or does not exist
         next(
           new ErrorAPI(
             APIMessage.USER_NOT_FOUND,
