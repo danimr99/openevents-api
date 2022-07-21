@@ -1,10 +1,13 @@
 import { isEmailValid } from '@sideway/address'
 
 import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
-import { Event, EventKey } from '../models/event/event'
-import { EventFormat } from '../models/event/event_format'
 
+import { Event, EventKey } from '../models/event/event'
+import { EventCategory } from '../models/event/event_category'
+import { EventFormat } from '../models/event/event_format'
 import { User, UserCredentials, UserKey } from '../models/user/user'
+
+import { compareDates } from './dates'
 
 /**
  * Function that checks if a value is a {@link String}.
@@ -175,13 +178,38 @@ export const validateEvent = (event: Event, areFieldsOptional: boolean): string[
         if (!isNumber(value)) invalidFields.push(key)
         break
       case 'format':
-      case 'category':
         if (!validateEnum(EventFormat, value)) invalidFields.push(key)
+        break
+      case 'category':
+        if (!validateEnum(EventCategory, value)) invalidFields.push(key)
         break
       case 'start_date':
       case 'end_date':
         if (!isDate(value)) invalidFields.push(key)
     }
+  }
+
+  // Check if start date is previous to end date
+  if (!compareDates(event.start_date, event.end_date)) {
+    invalidFields.push('start_date')
+  }
+
+  // If event is online, no max_attendees required
+  if (event.format === EventFormat.ONLINE) {
+    // Delete max_attendees from the invalid fields list
+    invalidFields = invalidFields.filter((field) => field !== 'max_attendees')
+  }
+
+  // If event is online, no location is required
+  if (event.format === EventFormat.ONLINE) {
+    // Delete location from the invalid fields list
+    invalidFields = invalidFields.filter((field) => field !== 'location')
+  }
+
+  // If event is face to face, no link is required
+  if (event.format === EventFormat.FACE_TO_FACE) {
+    // Delete location from the invalid fields list
+    invalidFields = invalidFields.filter((field) => field !== 'link')
   }
 
   // Check if event fields are optional

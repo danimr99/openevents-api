@@ -6,5 +6,6 @@ export enum DatabaseMessage {
   ERROR_SELECTING_USERS_BY_TEXT = 'An error has occurred while fetching users by text from the database',
   ERROR_UPDATING_USER = 'An error has occurred while updating a user from the database',
   ERROR_DELETING_USER = 'An error has occurred while deleting a user from the database',
-  ERROR_SELECTING_ALL_EVENTS = 'An error has occurred while fetching all the events from the database'
+  ERROR_SELECTING_ALL_EVENTS = 'An error has occurred while fetching all the events from the database',
+  ERROR_INSERTING_EVENT = 'An error has occurred while inserting an event to the database'
 }

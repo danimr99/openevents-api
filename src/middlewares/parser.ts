@@ -10,6 +10,8 @@ import { ErrorAPI } from '../models/error/error_api'
 
 import { isNumber, isObject, validateCredentials, validateEvent, validateUser } from '../utils/validator'
 import { getCurrentDate } from '../utils/dates'
+import { EventFormat } from '../models/event/event_format'
+import { EventCategory } from '../models/event/event_category'
 
 /**
  * Middleware to parse all information fields of a {@link User}.
@@ -309,17 +311,32 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
+      const formats = Object.keys(EventFormat).map((format) => format).toString()
+      const categories = Object.keys(EventCategory).map((category) => category).toString()
+
       switch (field) {
-        case 'name':
-        case 'last_name':
+        case 'title':
         case 'image_url':
+        case 'link':
+        case 'location':
+        case 'description':
           message = APIMessage.ERROR_INVALID_STRING_FIELD
           break
-        case 'email':
-          message = APIMessage.ERROR_INVALID_EMAIL_FIELD
+        case 'max_attendees':
+        case 'ticket_price':
+          message = APIMessage.ERROR_INVALID_NUMBER_FIELD
           break
-        case 'password':
-          message = `${APIMessage.ERROR_INVALID_PASSWORD_FIELD_I} ${getMinimumPasswordLength()} ${APIMessage.ERROR_INVALID_PASSWORD_FIELD_II}`
+        case 'format':
+          message = `${APIMessage.ERROR_INVALID_ENUM_FIELD} ${formats}`
+          break
+        case 'category':
+          message = `${APIMessage.ERROR_INVALID_ENUM_FIELD} ${categories}`
+          break
+        case 'start_date':
+          message = APIMessage.ERROR_INVALID_EVENT_START_DATE
+          break
+        case 'end_date':
+          message = APIMessage.ERROR_INVALID_DATE
           break
       }
 

@@ -5,8 +5,9 @@ import { HttpStatusCode } from '../models/enums/http_status_code'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
+import { parseAllEvent } from '../middlewares/parser'
 
-import { getAllEvents } from '../controllers/event_controller'
+import { createEvent, getAllEvents } from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
 
@@ -32,6 +33,39 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_SELECTING_ALL_EVENTS,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that creates an {@link Event}.
+ * HTTP Method: POST
+ * Endpoint: "/events"
+ */
+router.post('/', authenticateJWT, parseAllEvent, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get parsed event
+  const event = res.locals.PARSED_EVENT
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: event
+  }
+
+  // Create event
+  await createEvent(event)
+    .then(() => {
+      // Send response
+      res.status(HttpStatusCode.CREATED).json(event)
+    }).catch((error) => {
+      // Add error thrown to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_INSERTING_EVENT,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
