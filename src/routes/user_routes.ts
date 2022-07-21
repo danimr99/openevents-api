@@ -7,14 +7,13 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllUser, parseCredentials } from '../middlewares/parser'
+import { parseAllUser, parseCredentials, parseUserID } from '../middlewares/parser'
 
 import { createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById } from '../controllers/user_controller'
 
 import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
 import { formatErrorSQL } from '../utils/database'
-import { isNumber } from '../utils/validator'
 
 // Create a router for users
 const router = express.Router()
@@ -179,29 +178,15 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
  * HTTP Method: GET
  * Endpoint: "/users/{user_id}"
  */
-router.get('/:user_id', authenticateJWT, async (req: Request, res: Response, next: NextFunction) => {
+router.get('/:user_id', authenticateJWT, parseUserID, async (_req: Request, res: Response, next: NextFunction) => {
   // Get user ID from the URL path sent as parameter
-  const userId = parseInt(req.params.user_id)
+  const userId = res.locals.PARSED_USER_ID
 
   // Create stacktrace
   const stacktrace: any = {
     _original: {
       user_id: userId
     }
-  }
-
-  // Check if user ID is a number
-  if (!isNumber(userId)) {
-    // Set the user ID received
-    stacktrace._original.user_id = req.params.user_id
-
-    next(
-      new ErrorAPI(
-        APIMessage.INVALID_USER_ID,
-        HttpStatusCode.BAD_REQUEST,
-        stacktrace
-      )
-    )
   }
 
   // Get user by ID
@@ -235,6 +220,18 @@ router.get('/:user_id', authenticateJWT, async (req: Request, res: Response, nex
         )
       )
     })
+})
+
+/**
+ * Route that searches users with a name, last name or email
+ * matching the value of the query parameter.
+ * HTTP Method: GET
+ * Endpoint: "/users/search"
+ */
+router.get('/search', authenticateJWT, async (_req: Request, res: Response, _next: NextFunction) => {
+  res.status(HttpStatusCode.OK).json({
+    ok: 'Successful'
+  })
 })
 
 export default router

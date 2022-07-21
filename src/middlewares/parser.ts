@@ -7,7 +7,7 @@ import { HttpStatusCode } from '../models/enums/http_status_code'
 import { APIMessage } from '../models/enums/api_messages'
 import { ErrorAPI } from '../models/error/error_api'
 
-import { isObject, validateCredentials, validateUser } from '../utils/validator'
+import { isNumber, isObject, validateCredentials, validateUser } from '../utils/validator'
 
 /**
  * Middleware to parse all information fields of a {@link User}.
@@ -38,7 +38,7 @@ export const parsePartialUser = (req: Request, res: Response, next: NextFunction
 }
 
 /**
- * Middleware to get and validate all the information required for a {@link User}}
+ * Middleware to get and validate all the information required for a {@link User}
  * from the request body in JSON format. If any user field validation is unsuccessful,
  * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
  * to determine whether fields of a {@link User} are optional or required.
@@ -116,7 +116,7 @@ const parseUser = (req: Request, res: Response, next: NextFunction): void => {
 }
 
 /**
- * Middleware to get and validate credentials required for a {@link User}} to login
+ * Middleware to get and validate credentials required for a {@link User} to login
  * from the request body in JSON format. If any credential field validation is unsuccessful,
  * an error is thrown to the error handler middleware.
  * @param {Request} req - Request object.
@@ -177,8 +177,45 @@ export const parseCredentials = (req: Request, res: Response, next: NextFunction
       )
     )
   } else {
-    // Pass validated user to the next middleware
+    // Pass validated credentials to the next middleware
     res.locals.PARSED_USER_CREDENTIALS = credentials
     next()
   }
+}
+
+/**
+ * Middleware to get and validate a {@link User} ID from the URL path as a parameter.
+ * If the ID is not a number, an error is thrown to the error handler middleware.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parseUserID = (req: Request, res: Response, next: NextFunction): void => {
+  // Get user ID from the URL path sent as parameter
+  const userId = parseInt(req.params.user_id)
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if user ID is a number
+  if (!isNumber(userId)) {
+  // Set the user ID received
+    stacktrace._original.user_id = req.params.user_id
+
+    next(
+      new ErrorAPI(
+        APIMessage.INVALID_USER_ID,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Pass validated user ID to the next middleware
+  res.locals.PARSED_USER_ID = userId
+  next()
 }

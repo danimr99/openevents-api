@@ -42,7 +42,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
           // Check if exists a user with the ID from the received JWT
           if (userExists) {
             // Pass user ID to the next middleware
-            res.locals.PARSED_USER_CREDENTIALS = decodedJWT.id
+            res.locals.JWT_USER_ID = decodedJWT.id
             next()
           } else {
             next(authenticationError)
