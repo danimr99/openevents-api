@@ -11,5 +11,6 @@ export enum APIMessage {
   ERROR_MULTIPLE_USERS_SAME_EMAIL = 'Erroneously exist multiple users with the same email address',
   INVALID_CREDENTIALS = 'Invalid email address or password',
   INVALID_USER_ID = 'Invalid user ID',
-  USER_NOT_FOUND = 'User does not exist or was not found'
+  USER_NOT_FOUND = 'User does not exist or was not found',
+  USER_DELETED_SUCCESSFULLY = 'User was deleted successfully'
 }

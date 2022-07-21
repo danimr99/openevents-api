@@ -10,7 +10,7 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parsePartialUser, parseCredentials, parseUserID } from '../middlewares/parser'
 
 import {
-  createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById,
+  createUser, deleteUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById,
   getUsersByTextSearch, updateUserInformation
 } from '../controllers/user_controller'
 
@@ -274,7 +274,7 @@ router.get('/:user_id', authenticateJWT, parseUserID, async (_req: Request, res:
 })
 
 /**
- * Edits specified fields of the authenticated user.
+ * Route that edits specified fields of the authenticated user.
  * HTTP Method: PUT
  * Endpoint: "/users"
  */
@@ -305,6 +305,43 @@ router.put('/', authenticateJWT, parsePartialUser, async (_req: Request, res: Re
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_UPDATING_USER,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that deletes the authenticated user
+ * HTTP Method: DELETE
+ * Endpoint: "/users"
+ */
+router.delete('/', authenticateJWT, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Delete user
+  await deleteUser(userId)
+    .then(() => {
+      // Send response
+      res.status(200).json({
+        message: APIMessage.USER_DELETED_SUCCESSFULLY
+      })
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_DELETING_USER,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )

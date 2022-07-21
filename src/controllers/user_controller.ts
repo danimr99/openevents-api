@@ -145,3 +145,16 @@ export const updateUserInformation = async (id: number, user: User): Promise<Use
 
   return updatedUser
 }
+
+/**
+ * Fucntion to delete a {@link User} and all the information related with it
+ * from the database.
+ * @param {number} id - ID of the user to delete.
+ */
+export const deleteUser = async (id: number): Promise<void> => {
+  await userDAO.deleteUserById(id)
+  // TODO: Delete all events where the delete user is the owner
+  // TODO: Delete all assistances created by the deleted user
+  // TODO: Delete all the friendships related with the deleted user
+  // TODO: Delete all the messages sent and received by the deleted user
+}

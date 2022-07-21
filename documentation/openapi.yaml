@@ -70,6 +70,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseUserWithId'
+    delete:
+      tags:
+        - users
+      summary: Deletes the authenticated user and all the information related with it.
+      description: Besides deleting the user, it also deletes all the events where the user is the owner,
+        all the assistances created by the user, all the friendships where the deleted user is related and all
+        the messages sent or received by the user to delete.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: User and all the information related to it deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Message notifying that the action has been completed successfully.
+                    example: "User was deleted successfully"
 
   /users/login:
         post:

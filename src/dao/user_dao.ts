@@ -119,4 +119,18 @@ export class UserDAO {
       )
     )
   }
+
+  /**
+   * Function to delete a {@link UserWithId} by ID from the database.
+   * @param {number} id - ID of the user to delete.
+   */
+  async deleteUserById (id: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Delete user with the specified ID from the database
+      databaseConnection.promise().query(
+        'DELETE FROM users WHERE id = ?',
+        [id]
+      )
+    )
+  }
 }
