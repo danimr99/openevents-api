@@ -3,11 +3,13 @@ import { Request, Response, NextFunction } from 'express'
 import { getMinimumPasswordLength } from '../constants'
 
 import { User, UserCredentials } from '../models/user/user'
+import { Event } from '../models/event/event'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { APIMessage } from '../models/enums/api_messages'
 import { ErrorAPI } from '../models/error/error_api'
 
-import { isNumber, isObject, validateCredentials, validateUser } from '../utils/validator'
+import { isNumber, isObject, validateCredentials, validateEvent, validateUser } from '../utils/validator'
+import { getCurrentDate } from '../utils/dates'
 
 /**
  * Middleware to parse all information fields of a {@link User}.
@@ -218,4 +220,122 @@ export const parseUserID = (req: Request, res: Response, next: NextFunction): vo
   // Pass validated user ID to the next middleware
   res.locals.PARSED_USER_ID = userId
   next()
+}
+
+/**
+ * Middleware to parse all information fields of an {@link Event}.
+ * Uses {@link parseEvent} to get an {@link Event} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parseAllEvent = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all user fields as required
+  res.locals.optionalEventFields = false
+
+  return parseEvent(req, res, next)
+}
+
+/**
+ * Middleware to parse optional information fields of an {@link Event}.
+ * Uses {@link parseEvent} to get an {@link Event} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parsePartialEvent = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all user fields as optional
+  res.locals.optionalEventFields = true
+
+  return parseUser(req, res, next)
+}
+
+/**
+ * Middleware to get and validate all the information required for an {@link Event}
+ * from the request body in JSON format. If any event field validation is unsuccessful,
+ * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
+ * to determine whether fields of an {@link Event} are optional or required.
+ * @see res.locals.optionalEventFields
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Create a stacktrace
+  let stacktrace: any = {}
+
+  // Check if request body is not a JSON object
+  if (!isObject(req.body)) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_REQUEST_BODY_FORMAT,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Get all user data from request body
+  const event: Event = {
+    title: req.body.title,
+    owner_id: authenticatedUserId,
+    creation_date: getCurrentDate(),
+    image_url: req.body.image_url,
+    format: req.body.format,
+    link: req.body.link,
+    location: req.body.location,
+    description: req.body.description,
+    start_date: req.body.start_date,
+    end_date: req.body.end_date,
+    max_attendees: req.body.max_attendees,
+    ticket_price: req.body.ticket_price,
+    category: req.body.category
+  }
+
+  // Add received user data to stacktrace
+  stacktrace = {
+    _original: event
+  }
+
+  // Validate user data
+  const invalidFields: string[] = validateEvent(event, res.locals.optionalUserFields)
+
+  // Check if exists invalid fields
+  if (invalidFields.length > 0) {
+    // Add each invalid user field to stacktrace
+    stacktrace.invalid_fields = invalidFields.map(field => {
+      let message
+
+      switch (field) {
+        case 'name':
+        case 'last_name':
+        case 'image_url':
+          message = APIMessage.ERROR_INVALID_STRING_FIELD
+          break
+        case 'email':
+          message = APIMessage.ERROR_INVALID_EMAIL_FIELD
+          break
+        case 'password':
+          message = `${APIMessage.ERROR_INVALID_PASSWORD_FIELD_I} ${getMinimumPasswordLength()} ${APIMessage.ERROR_INVALID_PASSWORD_FIELD_II}`
+          break
+      }
+
+      return { field, message }
+    })
+
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_INVALID_USER_FIELDS,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Pass validated event to the next middleware
+    res.locals.PARSED_EVENT = event
+    next()
+  }
 }

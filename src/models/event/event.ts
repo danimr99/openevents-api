@@ -2,7 +2,6 @@ import { EventFormat } from './event_format'
 import { EventCategory } from './event_category'
 
 export interface Event {
-  id: number
   title: string
   owner_id: number
   creation_date: Date
@@ -16,6 +15,10 @@ export interface Event {
   max_attendees: number
   ticket_price: number
   category: EventCategory
+}
+
+export interface EventWithId extends Event {
+  id: number
 }
 
 export type EventKey = keyof Event

@@ -1,6 +1,8 @@
 import { isEmailValid } from '@sideway/address'
 
 import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
+import { Event, EventKey } from '../models/event/event'
+import { EventFormat } from '../models/event/event_format'
 
 import { User, UserCredentials, UserKey } from '../models/user/user'
 
@@ -146,6 +148,65 @@ export const validateCredentials = (credentials: UserCredentials): string[] => {
   }
 
   return invalidFields
+}
+
+/**
+ * Function that checks if an {@link Event} is valid.
+ * @param {Event} event - Event to check.
+ * @param {Boolean} areFieldsOptional - Flag to indicate whether all event fields are required or not.
+ * @returns {string[]} List of invalid event fields. If list is empty, event is valid.
+ */
+export const validateEvent = (event: Event, areFieldsOptional: boolean): string[] => {
+  let invalidFields: string[] = []
+
+  // Iterate through each key - value pair
+  for (const [key, value] of Object.entries(event)) {
+    // Fill the list of invalid fields if it is not for each value
+    switch (key) {
+      case 'title':
+      case 'image_url':
+      case 'link':
+      case 'location':
+      case 'description':
+        if (!validateString(value)) invalidFields.push(key)
+        break
+      case 'max_attendees':
+      case 'ticket_price':
+        if (!isNumber(value)) invalidFields.push(key)
+        break
+      case 'format':
+      case 'category':
+        if (!validateEnum(EventFormat, value)) invalidFields.push(key)
+        break
+      case 'start_date':
+      case 'end_date':
+        if (!isDate(value)) invalidFields.push(key)
+    }
+  }
+
+  // Check if event fields are optional
+  if (areFieldsOptional) {
+    // Filter invalid fields list to get only those incorrectly fulfilled
+    invalidFields = invalidFields.filter((field: string) => {
+      // Set field as an event property
+      const property = field as EventKey
+
+      // Check if value of the event property is fulfilled
+      return !(event[property] === undefined)
+    })
+  }
+
+  return invalidFields
+}
+
+/**
+ * Function that validates if a value is part of an enumeration.
+ * @param {any} enumType - Enumeration to check.
+ * @param {any} value - Value to check.
+ * @returns {Boolean} True if the value is part of an enumeration, false otherwise.
+ */
+export const validateEnum = (enumType: any, value: any): boolean => {
+  return Object.values(enumType).includes(value)
 }
 
 /**

@@ -1,1 +1,4 @@
-export type EventFormat = 'Face-to-face' | 'Online'
+export enum EventFormat {
+  FACE_TO_FACE = 'Face-to-face',
+  ONLINE = 'Online'
+}
