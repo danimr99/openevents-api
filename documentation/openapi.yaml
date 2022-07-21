@@ -100,7 +100,6 @@ paths:
         tags:
           - users
         summary: Gets a user by ID.
-        description: Gets a user by ID including the encrypted password.
         security:
           - BearerAuth: []
         parameters:
@@ -117,7 +116,35 @@ paths:
                 application/json:
                   schema:
                     $ref: '#/components/schemas/ResponseUserWithId'
+                    
+          "400":
+            description: User does not exist or was not found.
             
+  /users/search:
+    get:
+      tags:
+        - users
+      summary: Searches users with a name, last name or email matching the value of the query parameter.
+      security:
+          - BearerAuth: []
+      parameters:
+          - in: query
+            name: text
+            schema:
+              type: string
+            required: true
+            description: Text to search on the name, last name or email fields of a user to match.
+      responses:
+        "200":
+          description: List of users that match with the text on their name, last name or email field.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListUserWithId'
+        "400":
+          description: No text introduced.
+                
+        
 components:
   securitySchemes:
     BearerAuth:

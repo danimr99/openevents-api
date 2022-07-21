@@ -81,4 +81,28 @@ export class UserDAO {
       })
     )
   }
+
+  /**
+   * Function to get all the {@link PublicUser} from the database that their name,
+   * last_name or email match with the text to search.
+   * @param {string} text - Text to search.
+   * @returns {Promise<PublicUser[]} List of all users without their password that
+   * match with the search text.
+   */
+  async getUsersByTextSearch (text: string): Promise<PublicUser[]> {
+    let result: PublicUser[]
+
+    return await Promise<PublicUser[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT id, name, last_name, email, image_url FROM users WHERE name LIKE CONCAT(\'%\', ?, \'%\') ' +
+        'OR last_name LIKE CONCAT(\'%\', ?, \'%\') OR email LIKE CONCAT(\'%\', ?, \'%\')',
+        [text, text, text]
+      ).then(([rows]) => {
+        // Convert from database result object to user
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

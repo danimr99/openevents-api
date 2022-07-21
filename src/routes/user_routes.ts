@@ -9,11 +9,12 @@ import { DatabaseMessage } from '../models/enums/database_messages'
 import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parseCredentials, parseUserID } from '../middlewares/parser'
 
-import { createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById } from '../controllers/user_controller'
+import { createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById, getUsersByTextSearch } from '../controllers/user_controller'
 
 import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
 import { formatErrorSQL } from '../utils/database'
+import { validateString } from '../utils/validator'
 
 // Create a router for users
 const router = express.Router()
@@ -174,6 +175,53 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
 })
 
 /**
+ * Route that searches users with a name, last name or email
+ * matching the value of the query parameter.
+ * HTTP Method: GET
+ * Endpoint: "/users/search"
+ */
+router.get('/search', authenticateJWT, async (req: Request, res: Response, next: NextFunction) => {
+  // Get text to search from URL path sent as query
+  const { text } = req.query
+
+  // Set received data to error stacktrace
+  const stacktrace: any = {
+    _original: {
+      text: text
+    }
+  }
+
+  // Check if the text is valid
+  if (!validateString(text)) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_INVALID_STRING_FIELD,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Get all users matching the value of the query parameter
+  await getUsersByTextSearch(text as string)
+    .then((users) => {
+      // Send response
+      res.status(HttpStatusCode.OK).json(users)
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_SELECT_USERS_BY_TEXT,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
  * Route that gets a user by ID.
  * HTTP Method: GET
  * Endpoint: "/users/{user_id}"
@@ -220,18 +268,6 @@ router.get('/:user_id', authenticateJWT, parseUserID, async (_req: Request, res:
         )
       )
     })
-})
-
-/**
- * Route that searches users with a name, last name or email
- * matching the value of the query parameter.
- * HTTP Method: GET
- * Endpoint: "/users/search"
- */
-router.get('/search', authenticateJWT, async (_req: Request, res: Response, _next: NextFunction) => {
-  res.status(HttpStatusCode.OK).json({
-    ok: 'Successful'
-  })
 })
 
 export default router

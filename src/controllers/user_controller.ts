@@ -85,3 +85,14 @@ export const createUser = async (user: Required<User>): Promise<void> => {
 export const getAllUsers = async (): Promise<PublicUser[]> => {
   return await userDAO.getAllUsers().then((result) => result)
 }
+
+/**
+ * Function to get all the {@link PublicUser}s from the database whose name,
+ * last name or email matches with the text.
+ * @param {string} text - Text to search.
+ * @returns {Promise<PublicUser[]} List of all users without their password that
+ * match with the search text.
+ */
+export const getUsersByTextSearch = async (text: string): Promise<PublicUser[]> => {
+  return await userDAO.getUsersByTextSearch(text).then((result) => result)
+}
