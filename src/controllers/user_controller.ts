@@ -3,6 +3,7 @@ import { PublicUser, User, UserWithId } from '../models/user/user'
 import { UserDAO } from '../dao/user_dao'
 
 import { isNumber, isObject, validateString, validateUser } from '../utils/validator'
+import { encryptPassword } from '../utils/cypher'
 
 const userDAO = new UserDAO()
 
@@ -95,4 +96,52 @@ export const getAllUsers = async (): Promise<PublicUser[]> => {
  */
 export const getUsersByTextSearch = async (text: string): Promise<PublicUser[]> => {
   return await userDAO.getUsersByTextSearch(text).then((result) => result)
+}
+
+/**
+ * Fucntion to update the information of a {@link User} on the database.
+ * @param {number} id - ID of the user to update.
+ * @param {User} user - User with the updated information.
+ */
+export const updateUserInformation = async (id: number, user: User): Promise<UserWithId> => {
+  // Get user by ID with the existing information
+  const existingUser = await getUsersById(id)
+    .then((users) => {
+      return users[0]
+    })
+
+  // Get the user fields that are not marked as updatable
+  const notUpdatableFields = validateUser(user, false)
+
+  // Set new values for the updated user
+  const updatedUser: UserWithId = user as UserWithId
+  updatedUser.id = existingUser.id
+  updatedUser.password = validateString(user.password)
+    ? await encryptPassword(user.password)
+    : existingUser.password
+
+  // Set old values to those fields that are not marked as updatable
+  notUpdatableFields.forEach((field) => {
+    switch (field) {
+      case 'name':
+        updatedUser.name = (existingUser).name
+        break
+      case 'last_name':
+        updatedUser.last_name = (existingUser).last_name
+        break
+      case 'email':
+        updatedUser.email = (existingUser).email
+        break
+      case 'password':
+        updatedUser.password = (existingUser).password
+        break
+      case 'image_url':
+        updatedUser.image_url = (existingUser).image_url
+        break
+    }
+  })
+
+  await userDAO.updateUserById(updatedUser)
+
+  return updatedUser
 }

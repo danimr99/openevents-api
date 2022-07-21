@@ -7,9 +7,12 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllUser, parseCredentials, parseUserID } from '../middlewares/parser'
+import { parseAllUser, parsePartialUser, parseCredentials, parseUserID } from '../middlewares/parser'
 
-import { createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById, getUsersByTextSearch } from '../controllers/user_controller'
+import {
+  createUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById,
+  getUsersByTextSearch, updateUserInformation
+} from '../controllers/user_controller'
 
 import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
@@ -166,7 +169,7 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
 
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_SELECT_ALL_USERS,
+          DatabaseMessage.ERROR_SELECTING_ALL_USERS,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
@@ -213,7 +216,7 @@ router.get('/search', authenticateJWT, async (req: Request, res: Response, next:
 
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_SELECT_USERS_BY_TEXT,
+          DatabaseMessage.ERROR_SELECTING_USERS_BY_TEXT,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
@@ -262,7 +265,46 @@ router.get('/:user_id', authenticateJWT, parseUserID, async (_req: Request, res:
 
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_SELECT_USER_BY_ID,
+          DatabaseMessage.ERROR_SELECTING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Edits specified fields of the authenticated user.
+ * HTTP Method: PUT
+ * Endpoint: "/users"
+ */
+router.put('/', authenticateJWT, parsePartialUser, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Get parsed user
+  const user: User = res.locals.PARSED_USER
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId,
+      fields: user
+    }
+  }
+
+  // Update user information
+  await updateUserInformation(userId, user)
+    .then((updatedUser) => {
+      // Send success response
+      res.status(HttpStatusCode.OK).json(updatedUser)
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_UPDATING_USER,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )

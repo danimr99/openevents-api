@@ -105,4 +105,18 @@ export class UserDAO {
       })
     )
   }
+
+  /**
+   * Function to update a {@link UserWithId} from the database.
+   * @param {UserWithId} user - User to update from the database.
+   */
+  async updateUserById (user: UserWithId): Promise<any> {
+    return await Promise<any>.resolve(
+      // Update user on the database
+      databaseConnection.promise().query(
+        'UPDATE users SET name = ?, last_name = ?, email = ?, password = ?, image_url = ? WHERE id = ?',
+        [user.name, user.last_name, user.email, user.password, user.image_url, user.id]
+      )
+    )
+  }
 }

@@ -50,7 +50,27 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
-          
+    put:
+      tags:
+        - users
+      summary: Edits specified fields of the authenticated user.
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: User information in JSON format. Only the fields to be updated are required.
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/RequestUser'
+      responses:
+        "200":
+          description: User with the updated information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUserWithId'
+
   /users/login:
         post:
           tags:
@@ -143,7 +163,6 @@ paths:
                 $ref: '#/components/schemas/ResponseListUserWithId'
         "400":
           description: No text introduced.
-                
         
 components:
   securitySchemes:
