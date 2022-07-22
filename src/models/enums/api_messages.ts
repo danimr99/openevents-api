@@ -18,5 +18,6 @@ export enum APIMessage {
   USER_NOT_FOUND = 'User does not exist or was not found',
   USER_DELETED_SUCCESSFULLY = 'User was deleted successfully',
   INVALID_EVENT_ID = 'Invalid event ID',
-  EVENT_NOT_FOUND = 'Event does not exist or was not found'
+  EVENT_NOT_FOUND = 'Event does not exist or was not found',
+  ERROR_INVALID_EVENT_SEARCH_FIELDS = 'Event search fields must be properly fulfilled'
 }

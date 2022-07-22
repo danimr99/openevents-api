@@ -71,4 +71,71 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to get all the {@link EventWithId} from the database that its title and
+   * location contains the specified search parameters.
+   * @param {string} title - Title to search.
+   * @param {string} location - Location to search.
+   * @returns {Promise<EventWithId[]>} List of events that matches with the search parameters.
+   */
+  async getEventsByCompleteSearch (title: string, location: string): Promise<EventWithId[]> {
+    let result: EventWithId[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM events WHERE title LIKE CONCAT(\'%\', ?, \'%\') AND location LIKE CONCAT(\'%\', ?, \'%\')',
+        [title, location]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to get all the {@link EventWithId} from the database that its title contains
+   * the specified search parameters.
+   * @param {string} title - Title to search.
+   * @returns {Promise<EventWithId[]>} List of events that matches with the search parameters.
+   */
+  async getEventsByTitleSearch (title: string): Promise<EventWithId[]> {
+    let result: EventWithId[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM events WHERE title LIKE CONCAT(\'%\', ?, \'%\')',
+        [title]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to get all the {@link EventWithId} from the database that its location contains
+   * the specified search parameters.
+   * @param {string} location - Location to search.
+   * @returns {Promise<EventWithId[]>} List of events that matches with the search parameters.
+   */
+  async getEventsByLocationSearch (location: string): Promise<EventWithId[]> {
+    let result: EventWithId[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM events WHERE location LIKE CONCAT(\'%\', ?, \'%\') ',
+        [location]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

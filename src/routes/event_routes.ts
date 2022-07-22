@@ -6,9 +6,9 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventID } from '../middlewares/parser'
+import { parseAllEvent, parseEventID, parseEventSearch } from '../middlewares/parser'
 
-import { createEvent, getAllEvents, getEventsById } from '../controllers/event_controller'
+import { createEvent, getAllEvents, getEventsById, getEventsBySearch } from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
 
@@ -67,6 +67,44 @@ router.post('/', authenticateJWT, parseAllEvent, async (_req: Request, res: Resp
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_INSERTING_EVENT,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that searches events with a title or location
+ * matching the value of the query parameter.
+ * HTTP Method: GET
+ * Endpoint: "/users/search"
+ */
+router.get('/search', authenticateJWT, parseEventSearch, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get validated event title and location to search
+  const title = res.locals.PARSED_SEARCH_EVENT_TITLE
+  const location = res.locals.PARSED_SEARCH_EVENT_LOCATION
+
+  // Set received data to error stacktrace
+  const stacktrace: any = {
+    _original: {
+      title: title,
+      location: location
+    }
+  }
+
+  // Get events by search
+  await getEventsBySearch(title, location)
+    .then((events) => {
+      // Send response
+      res.status(HttpStatusCode.OK).json(events)
+    }).catch((error) => {
+    // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_SELECTING_EVENTS_BY_SEARCH,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )

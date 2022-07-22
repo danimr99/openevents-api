@@ -224,6 +224,36 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseEventWithId'
 
+  /events/search:
+    get:
+      tags:
+        - events
+      summary: Searches events with a title and/or location matching the value of the queries parameters.
+      security:
+          - BearerAuth: []
+      parameters:
+          - in: query
+            name: title
+            schema:
+              type: string
+            required: false
+            description: Title to search.
+          - in: query
+            name: location
+            schema:
+              type: string
+            required: false
+            description: Location to search.
+      responses:
+        "200":
+          description: List of events that match with the title and/or location queried.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithId'
+        "400":
+          description: Invalid title and/or location.
+
   /events/{event_id}:
       get:
         tags:

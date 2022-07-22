@@ -4,14 +4,18 @@ import { getMinimumPasswordLength } from '../constants'
 
 import { User, UserCredentials } from '../models/user/user'
 import { Event } from '../models/event/event'
+import { EventFormat } from '../models/event/event_format'
+import { EventCategory } from '../models/event/event_category'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { APIMessage } from '../models/enums/api_messages'
 import { ErrorAPI } from '../models/error/error_api'
 
-import { isNumber, isObject, validateCredentials, validateEvent, validateUser } from '../utils/validator'
+import {
+  isNumber, isObject, validateCredentials, validateEvent,
+  validateEventSearch, validateUser
+} from '../utils/validator'
+
 import { getCurrentDate } from '../utils/dates'
-import { EventFormat } from '../models/event/event_format'
-import { EventCategory } from '../models/event/event_category'
 
 /**
  * Middleware to parse all information fields of a {@link User}.
@@ -392,4 +396,50 @@ export const parseEventID = (req: Request, res: Response, next: NextFunction): v
   // Pass validated event ID to the next middleware
   res.locals.PARSED_EVENT_ID = eventId
   next()
+}
+
+export const parseEventSearch = (req: Request, res: Response, next: NextFunction): void => {
+  // Get event title and location to search from URL path sent as query
+  const { title, location } = req.query
+
+  // Set received data to error stacktrace
+  const stacktrace: any = {
+    _original: {
+      title: title,
+      location: location
+    }
+  }
+
+  // Validate search data
+  const invalidFields: string[] = validateEventSearch(title, location)
+
+  // Check if exists invalid fields
+  if (invalidFields.length > 0) {
+    // Add each invalid user field to stacktrace
+    stacktrace.invalid_fields = invalidFields.map(field => {
+      let message
+
+      switch (field) {
+        case 'title':
+        case 'location':
+          message = APIMessage.ERROR_INVALID_STRING_FIELD
+          break
+      }
+
+      return { field, message }
+    })
+
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_INVALID_EVENT_SEARCH_FIELDS,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Pass validated search data to the next middleware
+    res.locals.PARSED_SEARCH_EVENT_TITLE = title
+    res.locals.PARSED_SEARCH_EVENT_LOCATION = location
+    next()
+  }
 }

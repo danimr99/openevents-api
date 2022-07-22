@@ -238,6 +238,29 @@ export const validateEnum = (enumType: any, value: any): boolean => {
 }
 
 /**
+ * Function that checks if an event title and location are valid. Both fields are optional, it means
+ * that none of both are marked as invalid if they do not have a value.
+ * @param {string} title - Title to search.
+ * @param {string} location - Location to search.
+ * @returns {string[]} List of invalid fields. If list is empty, fields are valid.
+ */
+export const validateEventSearch = (title: string, location: string): string[] => {
+  const invalidFields: string[] = []
+
+  // Validate the title to search
+  if (!isString(title)) {
+    invalidFields.push('title')
+  }
+
+  // Validate the location to search
+  if (!isString(location)) {
+    invalidFields.push('location')
+  }
+
+  return invalidFields
+}
+
+/**
  * Function that checks if an event rating is valid.
  * @param {any} rating - Event rating to check.
  * @returns {Boolean} True if the event rating is a number and it is between min and max values, false otherwise.

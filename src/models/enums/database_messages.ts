@@ -8,5 +8,6 @@ export enum DatabaseMessage {
   ERROR_DELETING_USER = 'An error has occurred while deleting a user from the database',
   ERROR_SELECTING_ALL_EVENTS = 'An error has occurred while fetching all the events from the database',
   ERROR_INSERTING_EVENT = 'An error has occurred while inserting an event to the database',
-  ERROR_SELECTING_EVENT_BY_ID = 'An error has occurred while fetching an event by ID from the database'
+  ERROR_SELECTING_EVENT_BY_ID = 'An error has occurred while fetching an event by ID from the database',
+  ERROR_SELECTING_EVENTS_BY_SEARCH = 'An error has occurred while fetching events by search parameters from the database'
 }
