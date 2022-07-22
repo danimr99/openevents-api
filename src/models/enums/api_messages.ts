@@ -16,5 +16,7 @@ export enum APIMessage {
   INVALID_CREDENTIALS = 'Invalid email address or password',
   INVALID_USER_ID = 'Invalid user ID',
   USER_NOT_FOUND = 'User does not exist or was not found',
-  USER_DELETED_SUCCESSFULLY = 'User was deleted successfully'
+  USER_DELETED_SUCCESSFULLY = 'User was deleted successfully',
+  INVALID_EVENT_ID = 'Invalid event ID',
+  EVENT_NOT_FOUND = 'Event does not exist or was not found'
 }

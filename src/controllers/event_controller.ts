@@ -19,3 +19,12 @@ export const getAllEvents = async (): Promise<EventWithId[]> => {
 export const createEvent = async (event: Event): Promise<void> => {
   await eventDAO.insertEvent(event)
 }
+
+/**
+ * Function to get an event by ID.
+ * @param {number} id - ID to search.
+ * @returns {Promise<EventWithId[]>} List of events by ID.
+ */
+export const getEventsById = async (id: number): Promise<EventWithId[]> => {
+  return await eventDAO.getEventById(id).then((result) => result)
+}

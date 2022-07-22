@@ -356,3 +356,40 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     next()
   }
 }
+
+/**
+ * Middleware to get and validate an {@link Event} ID from the URL path as a parameter.
+ * If the ID is not a number, an error is thrown to the error handler middleware.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parseEventID = (req: Request, res: Response, next: NextFunction): void => {
+  // Get event ID from the URL path sent as parameter
+  const eventId = parseInt(req.params.event_id)
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      event_id: eventId
+    }
+  }
+
+  // Check if event ID is a number
+  if (!isNumber(eventId)) {
+  // Set the event ID received
+    stacktrace._original.event_id = req.params.event_id
+
+    next(
+      new ErrorAPI(
+        APIMessage.INVALID_EVENT_ID,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Pass validated event ID to the next middleware
+  res.locals.PARSED_EVENT_ID = eventId
+  next()
+}

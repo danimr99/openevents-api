@@ -26,7 +26,7 @@ export class UserDAO {
   }
 
   /**
-   * Function to get a list of {@link User}s by ID from the database.
+   * Function to get a {@link User} by ID from the database.
    * @param {number} id - ID to search.
    * @returns {Promise<UserWithId[]>} List of users with the specified ID.
    */

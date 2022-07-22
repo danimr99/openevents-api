@@ -17,7 +17,7 @@ export const getUsersByEmail = async (email: string = ''): Promise<UserWithId[]>
 }
 
 /**
- * Function to get all the users by ID.
+ * Function to get a {@link UserWithId} by ID.
  * @param {number} id - ID to search.
  * @returns {Promise<UserWithId[]>} List of users by ID.
  */

@@ -50,4 +50,25 @@ export class EventDAO {
       )
     )
   }
+
+  /**
+   * Function to get an {@link EventWithId} by ID from the database.
+   * @param {number} id - ID to search.
+   * @returns {Promise<EventWithId[]>} List of events with the specified ID.
+   */
+  async getEventById (id: number): Promise<EventWithId[]> {
+    let result: EventWithId[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM events WHERE id = ?',
+        [id]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }
