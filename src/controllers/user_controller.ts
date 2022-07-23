@@ -53,7 +53,7 @@ export const existsUserByEmail = async (email: string = ''): Promise<boolean> =>
  * @param {number} id - ID of the user to check.
  * @returns {boolean} True if a user with the specified ID exists, false otherwise.
  */
-export const existsUserByID = async (id: number): Promise<boolean> => {
+export const existsUserById = async (id: number): Promise<boolean> => {
   if (isNumber(id)) {
     // Get user by id
     const usersList = await getUsersById(id)
@@ -99,7 +99,7 @@ export const getUsersByTextSearch = async (text: string): Promise<PublicUser[]> 
 }
 
 /**
- * Fucntion to update the information of a {@link User} on the database.
+ * Function to update the information of a {@link User} on the database.
  * @param {number} id - ID of the user to update.
  * @param {User} user - User with the updated information.
  */

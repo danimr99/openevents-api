@@ -23,7 +23,7 @@ import { validateString } from '../utils/validator'
 const router = express.Router()
 
 /**
- * Route that creates a {@link User}.
+ * Route that creates a user.
  * HTTP Method: POST
  * Endpoint: "/users"
  */
@@ -87,7 +87,7 @@ router.post('/', parseAllUser, async (_req: Request, res: Response, next: NextFu
 })
 
 /**
- * Route that authenticates a {@link User}.
+ * Route that authenticates a user.
  * HTTP Method: POST
  * Endpoint: "/users/login"
  */
@@ -152,7 +152,7 @@ router.post('/login', parseCredentials, async (_req: Request, res: Response, nex
 })
 
 /**
- * Route that gets all {@link User}s.
+ * Route that gets all users.
  * HTTP Method: GET
  * Endpoint: "/users"
  */
@@ -179,7 +179,7 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
 
 /**
  * Route that searches users with a name, last name or email
- * matching the value of the query parameter.
+ * matching the value of the query parameters.
  * HTTP Method: GET
  * Endpoint: "/users/search"
  */
@@ -313,7 +313,7 @@ router.put('/', authenticateJWT, parsePartialUser, async (_req: Request, res: Re
 })
 
 /**
- * Route that deletes the authenticated user
+ * Route that deletes the authenticated user.
  * HTTP Method: DELETE
  * Endpoint: "/users"
  */

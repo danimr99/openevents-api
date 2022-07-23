@@ -9,5 +9,8 @@ export enum DatabaseMessage {
   ERROR_SELECTING_ALL_EVENTS = 'An error has occurred while fetching all the events from the database',
   ERROR_INSERTING_EVENT = 'An error has occurred while inserting an event to the database',
   ERROR_SELECTING_EVENT_BY_ID = 'An error has occurred while fetching an event by ID from the database',
-  ERROR_SELECTING_EVENTS_BY_SEARCH = 'An error has occurred while fetching events by search parameters from the database'
+  ERROR_SELECTING_EVENTS_BY_SEARCH = 'An error has occurred while fetching events by search parameters from the database',
+  ERROR_CHECKING_EVENT_BY_ID = 'An error has occurred while checking if exists an event on the database',
+  ERROR_CHECKING_EVENT_OWNER = 'An error has occurred while checking if a user is the owner of an event',
+  ERROR_UPDATING_EVENT = 'An error has occurred while updating an event from the database'
 }

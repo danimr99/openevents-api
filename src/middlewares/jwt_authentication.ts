@@ -7,7 +7,7 @@ import { ErrorAPI } from '../models/error/error_api'
 
 import { getJWTPrivateKey } from '../utils/authentication'
 
-import { existsUserByID } from '../controllers/user_controller'
+import { existsUserById } from '../controllers/user_controller'
 
 const authenticationError = new ErrorAPI(
   APIMessage.ERROR_INVALID_AUTHENTICATION_JWT,
@@ -38,7 +38,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
 
       // Check if exists the user owner of the JWT
       void Promise<boolean>.resolve(
-        existsUserByID(decodedJWT.id).then((userExists) => {
+        existsUserById(decodedJWT.id).then((userExists) => {
           // Check if exists a user with the ID from the received JWT
           if (userExists) {
             // Pass user ID to the next middleware

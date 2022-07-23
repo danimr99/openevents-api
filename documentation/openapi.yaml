@@ -277,6 +277,38 @@ paths:
                   $ref: '#/components/schemas/ResponseEventWithId'
           "400":
             description: Event does not exist or was not found.
+      put:
+        tags:
+          - events
+        summary: Edits specified fields of an event if the authenticated user is the owner of the event.
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: path
+            name: event_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the event to get 
+        requestBody:
+          description: Event information in JSON format. Only the fields to be updated are required.
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RequestEvent'
+        responses:
+          "200":
+            description: Event with the updated information.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ResponseEventWithId'
+          "400":
+            description: Any of the specified event fields to modify are not valid or the specified event was not
+              found or does not exist.
+          "403":
+            description: Authenticated user trying to modify the specified event is not the owner of it.
 
 components:
   securitySchemes:

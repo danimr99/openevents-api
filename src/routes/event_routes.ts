@@ -6,9 +6,12 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventID, parseEventSearch } from '../middlewares/parser'
+import { parseAllEvent, parseEventID, parseEventSearch, parsePartialEvent } from '../middlewares/parser'
 
-import { createEvent, getAllEvents, getEventsById, getEventsBySearch } from '../controllers/event_controller'
+import {
+  createEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
+  isUserEventOwner, updateEventInformation
+} from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
 
@@ -16,7 +19,7 @@ import { formatErrorSQL } from '../utils/database'
 const router = express.Router()
 
 /**
- * Route that gets all the {@link EventWithId}.
+ * Route that gets all the future events.
  * HTTP Method: GET
  * Endpoint: "/events"
  */
@@ -42,7 +45,7 @@ router.get('/', authenticateJWT, async (_req: Request, res: Response, next: Next
 })
 
 /**
- * Route that creates an {@link Event}.
+ * Route that creates an event.
  * HTTP Method: POST
  * Endpoint: "/events"
  */
@@ -113,7 +116,7 @@ router.get('/search', authenticateJWT, parseEventSearch, async (_req: Request, r
 })
 
 /**
- * Route that gets an {@link EventWithId} by ID.
+ * Route that gets an event by ID.
  * HTTP Method: GET
  * Endpoint: "/events/{event_id}"
  */
@@ -124,7 +127,7 @@ router.get('/:event_id', authenticateJWT, parseEventID, async (_req: Request, re
   // Create stacktrace
   const stacktrace: any = {
     _original: {
-      user_id: eventId
+      event_id: eventId
     }
   }
 
@@ -154,6 +157,100 @@ router.get('/:event_id', authenticateJWT, parseEventID, async (_req: Request, re
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_SELECTING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that edits specified fields of the event with matching ID.
+ * HTTP Method: PUT
+ * Endpoint: "/events/{event_id}"
+ */
+router.put('/:event_id', authenticateJWT, parseEventID, parsePartialEvent, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Get parsed event
+  const event = res.locals.PARSED_EVENT
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId,
+      event_id: eventId,
+      event: event
+    }
+  }
+
+  // Check if event with the specified ID exists
+  const existsEvent = await existsEventById(eventId)
+    .catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+
+  if (!(existsEvent ?? false)) {
+    next(
+      new ErrorAPI(
+        APIMessage.EVENT_NOT_FOUND,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Check if authenticated user ID is the owner of the event with the specified event ID
+  await isUserEventOwner(userId, eventId)
+    .then((isOwner) => {
+      if (!isOwner) {
+        next(
+          new ErrorAPI(
+            APIMessage.ERROR_USER_NOT_EVENT_OWNER,
+            HttpStatusCode.FORBIDDEN,
+            stacktrace
+          )
+        )
+      }
+    })
+    .catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_OWNER,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+
+  // Update event
+  await updateEventInformation(eventId, event)
+    .then((updatedEvent) => {
+      // Send success response
+      res.status(HttpStatusCode.OK).json(updatedEvent)
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_UPDATING_EVENT,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )

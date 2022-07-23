@@ -17,7 +17,9 @@ export enum APIMessage {
   INVALID_USER_ID = 'Invalid user ID',
   USER_NOT_FOUND = 'User does not exist or was not found',
   USER_DELETED_SUCCESSFULLY = 'User was deleted successfully',
+  ERROR_INVALID_EVENTS_FIELDS = 'All event information must be properly fulfilled',
   INVALID_EVENT_ID = 'Invalid event ID',
   EVENT_NOT_FOUND = 'Event does not exist or was not found',
-  ERROR_INVALID_EVENT_SEARCH_FIELDS = 'Event search fields must be properly fulfilled'
+  ERROR_INVALID_EVENT_SEARCH_FIELDS = 'Event search fields must be properly fulfilled',
+  ERROR_USER_NOT_EVENT_OWNER = 'Authenticated user is not the owner of the event'
 }

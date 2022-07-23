@@ -253,7 +253,7 @@ export const parsePartialEvent = (req: Request, res: Response, next: NextFunctio
   // Set all user fields as optional
   res.locals.optionalEventFields = true
 
-  return parseUser(req, res, next)
+  return parseEvent(req, res, next)
 }
 
 /**
@@ -307,7 +307,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
   }
 
   // Validate user data
-  const invalidFields: string[] = validateEvent(event, res.locals.optionalUserFields)
+  const invalidFields: string[] = validateEvent(event, res.locals.optionalEventFields)
 
   // Check if exists invalid fields
   if (invalidFields.length > 0) {
@@ -315,8 +315,8 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
-      const formats = Object.keys(EventFormat).map((format) => format).toString()
-      const categories = Object.keys(EventCategory).map((category) => category).toString()
+      const formats = Object.values(EventFormat).map((format) => format).toString()
+      const categories = Object.values(EventCategory).map((category) => category).toString()
 
       switch (field) {
         case 'title':
@@ -349,7 +349,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
 
     next(
       new ErrorAPI(
-        APIMessage.ERROR_INVALID_USER_FIELDS,
+        APIMessage.ERROR_INVALID_EVENTS_FIELDS,
         HttpStatusCode.BAD_REQUEST,
         stacktrace
       )
@@ -398,6 +398,14 @@ export const parseEventID = (req: Request, res: Response, next: NextFunction): v
   next()
 }
 
+/**
+ * Middleware to get and validate event search parameters from the URL path.
+ * Title and location are optional fields but an error is thrown if any of both are
+ * inserted and are of an invalid type.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
 export const parseEventSearch = (req: Request, res: Response, next: NextFunction): void => {
   // Get event title and location to search from URL path sent as query
   const { title, location } = req.query
@@ -411,7 +419,7 @@ export const parseEventSearch = (req: Request, res: Response, next: NextFunction
   }
 
   // Validate search data
-  const invalidFields: string[] = validateEventSearch(title, location)
+  const invalidFields: string[] = validateEventSearch(title as string, location as string)
 
   // Check if exists invalid fields
   if (invalidFields.length > 0) {

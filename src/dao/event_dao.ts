@@ -138,4 +138,31 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to update an {@link EventWithId} from the database.
+   * @param {UserWithId} event - Event to update from the database.
+   */
+  async updateEventById (event: EventWithId): Promise<any> {
+    let eventFormat: number
+
+    // Get event format to insert
+    switch (event.format) {
+      case EventFormat.FACE_TO_FACE:
+        eventFormat = 0
+        break
+      case EventFormat.ONLINE:
+        eventFormat = 1
+    }
+
+    return await Promise<any>.resolve(
+      // Update event on the database
+      databaseConnection.promise().query(
+        'UPDATE events SET title = ?, image_url = ?, format = ?, link = ?, location = ?, description = ?, start_date = ?, ' +
+        'end_date = ?, max_attendees = ?, ticket_price = ?, category = ? WHERE id = ?',
+        [event.title, event.image_url, eventFormat, event.link, event.location, event.description, event.start_date,
+          event.end_date, event.max_attendees, event.ticket_price, event.category, event.id]
+      )
+    )
+  }
 }
