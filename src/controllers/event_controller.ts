@@ -79,37 +79,37 @@ export const updateEventInformation = async (id: number, event: Event): Promise<
   notUpdatableFields.forEach((field) => {
     switch (field) {
       case 'title':
-        updatedEvent.title = (existingEvent).title
+        updatedEvent.title = existingEvent.title
         break
       case 'image_url':
-        updatedEvent.image_url = (existingEvent).image_url
+        updatedEvent.image_url = existingEvent.image_url
         break
       case 'format':
         updatedEvent.format = (existingEvent).format
         break
       case 'link':
-        updatedEvent.link = (existingEvent).link
+        updatedEvent.link = existingEvent.link
         break
       case 'location':
-        updatedEvent.location = (existingEvent).location
+        updatedEvent.location = existingEvent.location
         break
       case 'description':
-        updatedEvent.description = (existingEvent).description
+        updatedEvent.description = existingEvent.description
         break
       case 'start_date':
-        updatedEvent.start_date = toDate((existingEvent).start_date)
+        updatedEvent.start_date = toDate(existingEvent.start_date)
         break
       case 'end_date':
-        updatedEvent.end_date = toDate((existingEvent).end_date)
+        updatedEvent.end_date = toDate(existingEvent.end_date)
         break
       case 'max_attendees':
-        updatedEvent.max_attendees = (existingEvent).max_attendees
+        updatedEvent.max_attendees = existingEvent.max_attendees
         break
       case 'ticket_price':
-        updatedEvent.ticket_price = (existingEvent).ticket_price
+        updatedEvent.ticket_price = existingEvent.ticket_price
         break
       case 'category':
-        updatedEvent.category = (existingEvent).category
+        updatedEvent.category = existingEvent.category
         break
     }
   })
@@ -168,4 +168,12 @@ export const isUserEventOwner = async (userId: number, eventId: number): Promise
         return false
       })
   )
+}
+
+/**
+ * Fucntion to delete an {@link EventWithId} from the database.
+ * @param {number} id - ID of the event to delete.
+ */
+export const deleteEvent = async (id: number): Promise<void> => {
+  await eventDAO.deleteEventById(id)
 }

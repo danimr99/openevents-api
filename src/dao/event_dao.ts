@@ -144,15 +144,22 @@ export class EventDAO {
    * @param {UserWithId} event - Event to update from the database.
    */
   async updateEventById (event: EventWithId): Promise<any> {
-    let eventFormat: number
+    let eventFormat: any
 
     // Get event format to insert
     switch (event.format) {
       case EventFormat.FACE_TO_FACE:
+        // Field has been modified to EventFormat.FACE_TO_FACE
         eventFormat = 0
         break
       case EventFormat.ONLINE:
+        // Field has been modified to EventFormat.ONLINE
         eventFormat = 1
+        break
+      default:
+        // Field has not been updated
+        eventFormat = event.format
+        break
     }
 
     return await Promise<any>.resolve(
@@ -162,6 +169,20 @@ export class EventDAO {
         'end_date = ?, max_attendees = ?, ticket_price = ?, category = ? WHERE id = ?',
         [event.title, event.image_url, eventFormat, event.link, event.location, event.description, event.start_date,
           event.end_date, event.max_attendees, event.ticket_price, event.category, event.id]
+      )
+    )
+  }
+
+  /**
+   * Function to delete an {@link EventWithId} by ID from the database.
+   * @param {number} id - ID of the event to delete.
+   */
+  async deleteEventById (id: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Delete event with the specified ID from the database
+      databaseConnection.promise().query(
+        'DELETE FROM events WHERE id = ?',
+        [id]
       )
     )
   }

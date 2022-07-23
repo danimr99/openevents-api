@@ -7,14 +7,13 @@ import { Event } from '../models/event/event'
 import { EventFormat } from '../models/event/event_format'
 import { EventCategory } from '../models/event/event_category'
 import { HttpStatusCode } from '../models/enums/http_status_code'
-import { APIMessage } from '../models/enums/api_messages'
 import { ErrorAPI } from '../models/error/error_api'
+import { APIMessage } from '../models/enums/api_messages'
 
 import {
   isNumber, isObject, validateCredentials, validateEvent,
   validateEventSearch, validateUser
 } from '../utils/validator'
-
 import { getCurrentDate } from '../utils/dates'
 
 /**
@@ -198,7 +197,7 @@ export const parseCredentials = (req: Request, res: Response, next: NextFunction
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
-export const parseUserID = (req: Request, res: Response, next: NextFunction): void => {
+export const parseUserId = (req: Request, res: Response, next: NextFunction): void => {
   // Get user ID from the URL path sent as parameter
   const userId = parseInt(req.params.user_id)
 
@@ -368,7 +367,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
-export const parseEventID = (req: Request, res: Response, next: NextFunction): void => {
+export const parseEventId = (req: Request, res: Response, next: NextFunction): void => {
   // Get event ID from the URL path sent as parameter
   const eventId = parseInt(req.params.event_id)
 

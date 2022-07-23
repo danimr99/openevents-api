@@ -7,7 +7,7 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllUser, parsePartialUser, parseCredentials, parseUserID } from '../middlewares/parser'
+import { parseAllUser, parsePartialUser, parseCredentials, parseUserId } from '../middlewares/parser'
 
 import {
   createUser, deleteUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById,
@@ -229,7 +229,7 @@ router.get('/search', authenticateJWT, async (req: Request, res: Response, next:
  * HTTP Method: GET
  * Endpoint: "/users/{user_id}"
  */
-router.get('/:user_id', authenticateJWT, parseUserID, async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
   // Get user ID from the URL path sent as parameter
   const userId = res.locals.PARSED_USER_ID
 
@@ -332,7 +332,7 @@ router.delete('/', authenticateJWT, async (_req: Request, res: Response, next: N
   await deleteUser(userId)
     .then(() => {
       // Send response
-      res.status(200).json({
+      res.status(HttpStatusCode.OK).json({
         message: APIMessage.USER_DELETED_SUCCESSFULLY
       })
     }).catch((error) => {

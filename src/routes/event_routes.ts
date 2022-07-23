@@ -6,10 +6,10 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventID, parseEventSearch, parsePartialEvent } from '../middlewares/parser'
+import { parseAllEvent, parseEventId, parseEventSearch, parsePartialEvent } from '../middlewares/parser'
 
 import {
-  createEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
+  createEvent, deleteEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
   isUserEventOwner, updateEventInformation
 } from '../controllers/event_controller'
 
@@ -120,7 +120,7 @@ router.get('/search', authenticateJWT, parseEventSearch, async (_req: Request, r
  * HTTP Method: GET
  * Endpoint: "/events/{event_id}"
  */
-router.get('/:event_id', authenticateJWT, parseEventID, async (_req: Request, res: Response, next: NextFunction) => {
+router.get('/:event_id', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
   // Get event ID from the URL path sent as parameter
   const eventId = res.locals.PARSED_EVENT_ID
 
@@ -169,7 +169,7 @@ router.get('/:event_id', authenticateJWT, parseEventID, async (_req: Request, re
  * HTTP Method: PUT
  * Endpoint: "/events/{event_id}"
  */
-router.put('/:event_id', authenticateJWT, parseEventID, parsePartialEvent, async (_req: Request, res: Response, next: NextFunction) => {
+router.put('/:event_id', authenticateJWT, parseEventId, parsePartialEvent, async (_req: Request, res: Response, next: NextFunction) => {
   // Get authenticated user ID
   const userId: number = res.locals.JWT_USER_ID
 
@@ -185,6 +185,97 @@ router.put('/:event_id', authenticateJWT, parseEventID, parsePartialEvent, async
       user_id: userId,
       event_id: eventId,
       event: event
+    }
+  }
+
+  // Check if event with the specified ID exists
+  const existsEvent = await existsEventById(eventId)
+    .catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+
+  if (!(existsEvent ?? false)) {
+    next(
+      new ErrorAPI(
+        APIMessage.EVENT_NOT_FOUND,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Check if authenticated user ID is the owner of the event with the specified event ID
+    const isOwner = await isUserEventOwner(userId, eventId)
+      .catch((error) => {
+        // Add thrown error to stacktrace
+        stacktrace.error_sql = formatErrorSQL(error)
+
+        next(
+          new ErrorAPI(
+            DatabaseMessage.ERROR_CHECKING_EVENT_OWNER,
+            HttpStatusCode.INTERNAL_SERVER_ERROR,
+            stacktrace
+          )
+        )
+      })
+
+    if (!(isOwner ?? false)) {
+      next(
+        new ErrorAPI(
+          APIMessage.ERROR_USER_NOT_EVENT_OWNER,
+          HttpStatusCode.FORBIDDEN,
+          stacktrace
+        )
+      )
+    } else {
+      // Update event
+      await updateEventInformation(eventId, event)
+        .then((updatedEvent) => {
+          // Send success response
+          res.status(HttpStatusCode.OK).json(updatedEvent)
+        }).catch((error) => {
+          // Add thrown error to stacktrace
+          stacktrace.error_sql = formatErrorSQL(error)
+          console.log(error)
+
+          next(
+            new ErrorAPI(
+              DatabaseMessage.ERROR_UPDATING_EVENT,
+              HttpStatusCode.INTERNAL_SERVER_ERROR,
+              stacktrace
+            )
+          )
+        })
+    }
+  }
+})
+
+/**
+ * Route that deletes an event with matching ID.
+ * HTTP Method: DELETE
+ * Endpoint: "/events/{event_id}"
+ */
+// FIXME: Deletes the event when the auth user is not the owner => TEST IT ALL => ERRORS ON TERMINAL
+router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
+// Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId,
+      event_id: eventId
     }
   }
 
@@ -239,18 +330,20 @@ router.put('/:event_id', authenticateJWT, parseEventID, parsePartialEvent, async
       )
     })
 
-  // Update event
-  await updateEventInformation(eventId, event)
-    .then((updatedEvent) => {
-      // Send success response
-      res.status(HttpStatusCode.OK).json(updatedEvent)
+  // Delete event
+  await deleteEvent(eventId)
+    .then(() => {
+      // Send response
+      res.status(HttpStatusCode.OK).json({
+        message: APIMessage.EVENT_DELETED_SUCCESSFULLY
+      })
     }).catch((error) => {
       // Add thrown error to stacktrace
       stacktrace.error_sql = formatErrorSQL(error)
 
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_UPDATING_EVENT,
+          DatabaseMessage.ERROR_DELETING_EVENT,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
