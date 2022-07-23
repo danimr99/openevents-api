@@ -244,7 +244,6 @@ router.put('/:event_id', authenticateJWT, parseEventId, parsePartialEvent, async
         }).catch((error) => {
           // Add thrown error to stacktrace
           stacktrace.error_sql = formatErrorSQL(error)
-          console.log(error)
 
           next(
             new ErrorAPI(
@@ -302,53 +301,52 @@ router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request,
         stacktrace
       )
     )
-  }
+  } else {
+    // Check if authenticated user ID is the owner of the event with the specified event ID
+    const isOwner = await isUserEventOwner(userId, eventId)
+      .catch((error) => {
+        // Add thrown error to stacktrace
+        stacktrace.error_sql = formatErrorSQL(error)
 
-  // Check if authenticated user ID is the owner of the event with the specified event ID
-  await isUserEventOwner(userId, eventId)
-    .then((isOwner) => {
-      if (!isOwner) {
         next(
           new ErrorAPI(
-            APIMessage.ERROR_USER_NOT_EVENT_OWNER,
-            HttpStatusCode.FORBIDDEN,
+            DatabaseMessage.ERROR_CHECKING_EVENT_OWNER,
+            HttpStatusCode.INTERNAL_SERVER_ERROR,
             stacktrace
           )
         )
-      }
-    })
-    .catch((error) => {
-      // Add thrown error to stacktrace
-      stacktrace.error_sql = formatErrorSQL(error)
-
-      next(
-        new ErrorAPI(
-          DatabaseMessage.ERROR_CHECKING_EVENT_OWNER,
-          HttpStatusCode.INTERNAL_SERVER_ERROR,
-          stacktrace
-        )
-      )
-    })
-
-  // Delete event
-  await deleteEvent(eventId)
-    .then(() => {
-      // Send response
-      res.status(HttpStatusCode.OK).json({
-        message: APIMessage.EVENT_DELETED_SUCCESSFULLY
       })
-    }).catch((error) => {
-      // Add thrown error to stacktrace
-      stacktrace.error_sql = formatErrorSQL(error)
 
+    if (!(isOwner ?? false)) {
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_DELETING_EVENT,
-          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          APIMessage.ERROR_USER_NOT_EVENT_OWNER,
+          HttpStatusCode.FORBIDDEN,
           stacktrace
         )
       )
-    })
+    } else {
+      // Delete event
+      await deleteEvent(eventId)
+        .then(() => {
+          // Send response
+          res.status(HttpStatusCode.OK).json({
+            message: APIMessage.EVENT_DELETED_SUCCESSFULLY
+          })
+        }).catch((error) => {
+          // Add thrown error to stacktrace
+          stacktrace.error_sql = formatErrorSQL(error)
+
+          next(
+            new ErrorAPI(
+              DatabaseMessage.ERROR_DELETING_EVENT,
+              HttpStatusCode.INTERNAL_SERVER_ERROR,
+              stacktrace
+            )
+          )
+        })
+    }
+  }
 })
 
 export default router
