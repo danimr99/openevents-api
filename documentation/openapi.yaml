@@ -258,7 +258,7 @@ paths:
       get:
         tags:
           - events
-        summary: Gets an event by ID
+        summary: Gets an event by ID.
         security:
           - BearerAuth: []
         parameters:
@@ -267,7 +267,7 @@ paths:
             schema:
               type: integer
             required: true
-            description: ID of the event to get  
+            description: ID of the event to get
         responses:
           "200":
             description: Event matching with the specified ID.
@@ -289,7 +289,7 @@ paths:
             schema:
               type: integer
             required: true
-            description: ID of the event to get 
+            description: ID of the event to edit 
         requestBody:
           description: Event information in JSON format. Only the fields to be updated are required.
           required: true
@@ -305,10 +305,41 @@ paths:
                 schema:
                   $ref: '#/components/schemas/ResponseEventWithId'
           "400":
-            description: Any of the specified event fields to modify are not valid or the specified event was not
-              found or does not exist.
+            description: Any of the specified event fields to modify are not valid.
           "403":
             description: Authenticated user trying to modify the specified event is not the owner of it.
+          "404":
+            description: Specified event does not exist or was not found.
+      delete:
+        tags:
+          - events
+        summary: Deletes an event with matching ID.
+        description: Deletes an event by ID if the authenticated user is the owner of it.
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: path
+            name: event_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the event to delete
+        responses:
+          "200":
+            description: Event deleted successfully.
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      description: Message notifying that the action has been completed successfully.
+                      example: "Event was deleted successfully"
+          "403":
+            description: Authenticated user is not the owner of the specified event.
+          "404":
+            description: Event to be deleted does not exist or was not found.
 
 components:
   securitySchemes:

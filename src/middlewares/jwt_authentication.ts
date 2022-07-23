@@ -5,9 +5,9 @@ import { APIMessage } from '../models/enums/api_messages'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
 
-import { getJWTPrivateKey } from '../utils/authentication'
-
 import { existsUserById } from '../controllers/user_controller'
+
+import { getJWTPrivateKey } from '../utils/authentication'
 
 const authenticationError = new ErrorAPI(
   APIMessage.ERROR_INVALID_AUTHENTICATION_JWT,

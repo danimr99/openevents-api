@@ -207,7 +207,7 @@ router.put('/:event_id', authenticateJWT, parseEventId, parsePartialEvent, async
     next(
       new ErrorAPI(
         APIMessage.EVENT_NOT_FOUND,
-        HttpStatusCode.BAD_REQUEST,
+        HttpStatusCode.NOT_FOUND,
         stacktrace
       )
     )
@@ -262,7 +262,6 @@ router.put('/:event_id', authenticateJWT, parseEventId, parsePartialEvent, async
  * HTTP Method: DELETE
  * Endpoint: "/events/{event_id}"
  */
-// FIXME: Deletes the event when the auth user is not the owner => TEST IT ALL => ERRORS ON TERMINAL
 router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
 // Get authenticated user ID
   const userId: number = res.locals.JWT_USER_ID
@@ -297,7 +296,7 @@ router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request,
     next(
       new ErrorAPI(
         APIMessage.EVENT_NOT_FOUND,
-        HttpStatusCode.BAD_REQUEST,
+        HttpStatusCode.NOT_FOUND,
         stacktrace
       )
     )
