@@ -6,13 +6,14 @@ import { User, UserCredentials } from '../models/user/user'
 import { Event } from '../models/event/event'
 import { EventFormat } from '../models/event/event_format'
 import { EventCategory } from '../models/event/event_category'
+import { Message } from '../models/message/message'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
 import { APIMessage } from '../models/enums/api_messages'
 
 import {
   isNumber, isObject, validateCredentials, validateEvent,
-  validateEventSearch, validateUser
+  validateEventSearch, validateMessage, validateUser
 } from '../utils/validator'
 import { getCurrentDate } from '../utils/dates'
 
@@ -300,17 +301,17 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     category: req.body.category
   }
 
-  // Add received user data to stacktrace
+  // Add received event data to stacktrace
   stacktrace = {
     _original: event
   }
 
-  // Validate user data
+  // Validate event data
   const invalidFields: string[] = validateEvent(event, res.locals.optionalEventFields)
 
   // Check if exists invalid fields
   if (invalidFields.length > 0) {
-    // Add each invalid user field to stacktrace
+    // Add each invalid event field to stacktrace
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
@@ -348,7 +349,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
 
     next(
       new ErrorAPI(
-        APIMessage.ERROR_INVALID_EVENTS_FIELDS,
+        APIMessage.ERROR_INVALID_EVENT_FIELDS,
         HttpStatusCode.BAD_REQUEST,
         stacktrace
       )
@@ -447,6 +448,111 @@ export const parseEventSearch = (req: Request, res: Response, next: NextFunction
     // Pass validated search data to the next middleware
     res.locals.PARSED_SEARCH_EVENT_TITLE = title
     res.locals.PARSED_SEARCH_EVENT_LOCATION = location
+    next()
+  }
+}
+
+/**
+ * Middleware to parse all information fields of a {@link Message}.
+ * Uses {@link parseMessage} to get a {@link Message} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parseAllMessage = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all user fields as required
+  res.locals.optionalMessageFields = false
+
+  return parseMessage(req, res, next)
+}
+
+/**
+ * Middleware to parse optional information fields of a {@link Message}.
+ * Uses {@link parseMessage} to get a {@link Message} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parsePartialMessage = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all user fields as optional
+  res.locals.optionalMessageFields = true
+
+  return parseMessage(req, res, next)
+}
+
+/**
+ * Middleware to get and validate all the information required for a {@link Message}
+ * from the request body in JSON format. If any message field validation is unsuccessful,
+ * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
+ * to determine whether fields of a {@link Message} are optional or required.
+ * @see res.locals.optionalMessageFields
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+const parseMessage = (req: Request, res: Response, next: NextFunction): void => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Create a stacktrace
+  let stacktrace: any = {}
+
+  // Check if request body is not a JSON object
+  if (!isObject(req.body)) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_REQUEST_BODY_FORMAT,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Get all message data from request body
+  const message: Message = {
+    senderUserId: authenticatedUserId,
+    receiverUserId: req.body.receiver_user_id,
+    content: req.body.content,
+    timestamp: getCurrentDate()
+  }
+
+  // Add received message data to stacktrace
+  stacktrace = {
+    _original: message
+  }
+
+  // Validate message data
+  const invalidFields: string[] = validateMessage(message, res.locals.optionalMessageFields)
+
+  // Check if exists invalid fields
+  if (invalidFields.length > 0) {
+    // Add each invalid message field to stacktrace
+    stacktrace.invalid_fields = invalidFields.map(field => {
+      let message
+
+      switch (field) {
+        case 'receiverUserId':
+          field = 'receiver_user_id'
+          message = APIMessage.ERROR_INVALID_NUMBER_FIELD
+          break
+        case 'content':
+          message = APIMessage.ERROR_INVALID_STRING_FIELD
+          break
+      }
+
+      return { field, message }
+    })
+
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_INVALID_MESSAGE_FIELDS,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Pass validated message to the next middleware
+    res.locals.PARSED_MESSAGE = message
     next()
   }
 }

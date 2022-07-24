@@ -2,10 +2,11 @@ import { isEmailValid } from '@sideway/address'
 
 import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
 
+import { User, UserCredentials, UserKey } from '../models/user/user'
 import { Event, EventKey } from '../models/event/event'
 import { EventCategory } from '../models/event/event_category'
 import { EventFormat } from '../models/event/event_format'
-import { User, UserCredentials, UserKey } from '../models/user/user'
+import { Message, MessageKey } from '../models/message/message'
 
 import { compareDates } from './dates'
 
@@ -275,4 +276,41 @@ export const validateEventRating = (rating: any): boolean => {
 
   // Check if number is between min and max ranges
   return rating >= min && rating <= max
+}
+
+/**
+ * Function that checks if a {@link Message} is valid.
+ * @param {Event} message - Message to check.
+ * @param {Boolean} areFieldsOptional - Flag to indicate whether all message fields are required or not.
+ * @returns {string[]} List of invalid message fields. If list is empty, message is valid.
+ */
+export const validateMessage = (message: Message, areFieldsOptional: boolean): string[] => {
+  let invalidFields: string[] = []
+
+  // Iterate through each key - value pair
+  for (const [key, value] of Object.entries(message)) {
+    // Fill the list of invalid fields if it is not for each value
+    switch (key) {
+      case 'receiverUserId':
+        if (!isNumber(value)) invalidFields.push(key)
+        break
+      case 'content':
+        if (!validateString(value)) invalidFields.push(key)
+        break
+    }
+  }
+
+  // Check if event fields are optional
+  if (areFieldsOptional) {
+    // Filter invalid fields list to get only those incorrectly fulfilled
+    invalidFields = invalidFields.filter((field: string) => {
+      // Set field as an event property
+      const property = field as MessageKey
+
+      // Check if value of the event property is fulfilled
+      return !(message[property] === undefined)
+    })
+  }
+
+  return invalidFields
 }

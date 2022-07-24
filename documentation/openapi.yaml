@@ -341,6 +341,37 @@ paths:
           "404":
             description: Event to be deleted does not exist or was not found.
 
+  /messages:
+    post:
+      tags:
+        - messages
+      summary: Creates a message.
+      description: Creates a message sent by the authenticated user to another one.
+      security:
+        - BearerAuth: []
+      requestBody:
+        description: Message information in JSON format.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  example: "Hey there! What's up?"
+                receiver_user_id:
+                  type: number
+                  example: 1
+      responses:
+        "201":
+          description: Created message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+
+
 components:
   securitySchemes:
     BearerAuth:
@@ -563,3 +594,19 @@ components:
           category: 
             type: string
             example: 'Art'
+    ResponseMessage:
+      type: object
+      properties:
+        sender_user_id:
+          type: number
+          example: 1
+        receiver_user_id:
+          type: number
+          example: 2
+        content:
+          type: string
+          example: "Hey there! What's up?"
+        timestamp:
+          type: string
+          example: "2022-07-24T12:18:11.470Z"
+        
