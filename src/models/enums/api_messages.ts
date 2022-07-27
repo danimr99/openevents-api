@@ -26,5 +26,10 @@ export enum APIMessage {
   ERROR_INVALID_MESSAGE_FIELDS = 'All message information must be properly fulfilled',
   ERROR_MESSAGE_RECEIVER_NOT_FOUND = 'Message receiver does not exist or was not found',
   ERROR_CANNOT_SEND_MESSAGE_ITSELF = 'You cannot send a message to yourself',
-  ERROR_CANNOT_GET_CHAT_WITH_ITSELF = 'You cannot get a chat with yourself'
+  ERROR_CANNOT_GET_CHAT_WITH_ITSELF = 'You cannot get a chat with yourself',
+  ERROR_CANNOT_SEND_FRIEND_REQUEST_ITSELF = 'You cannot send a friend request to yourself',
+  FRIEND_REQUEST_ALREADY_SENT = 'Friend request was already sent to the user',
+  FRIEND_REQUEST_ACCEPTED = 'Friend request has been accepted',
+  FRIEND_REQUEST_SENT = 'Friend request has been sent',
+  ALREADY_FRIENDS = 'You are already friends'
 }

@@ -50,4 +50,57 @@ export class FriendshipDAO {
       })
     )
   }
+
+  /**
+   * Function to get a friend request between two {@link User}
+   * from the database.
+   * @param {number} userId - ID of a user.
+   * @param {number} externalUserId - ID of another user.
+   * @returns {Promise<Friendship[]>} Frienship between both users.
+   */
+  async getFriendRequest (userId: number, externalUserId: number): Promise<Friendship[]> {
+    let result: Friendship[]
+
+    return await Promise<Friendship[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM friendships WHERE (user_id = ? AND friend_user_id = ?) OR (user_id = ? AND friend_user_id = ?)',
+        [userId, externalUserId, externalUserId, userId]
+      ).then(([rows]) => {
+        // Convert from database result object to friendship
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to accept a friend request between users.
+   * @param userId - ID of a user.
+   * @param externalUserId - ID of another user.
+   */
+  async acceptFriendRequest (userId: number, externalUserId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Update friend request from the database
+      databaseConnection.promise().query(
+        'UPDATE friendships SET status = ? WHERE user_id = ? AND friend_user_id = ?',
+        [FriendshipStatus.ACCEPTED, externalUserId, userId]
+      )
+    )
+  }
+
+  /**
+   * Function to create a friend request between users.
+   * @param {number} userId - ID of a user.
+   * @param {number} externalUserId - ID of another user.
+   */
+  async createFriendRequest (userId: number, externalUserId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Insert friend request to the database
+      databaseConnection.promise().query(
+        'INSERT INTO friendships (user_id, friend_user_id, status) VALUES (?, ?, ?)',
+        [userId, externalUserId, FriendshipStatus.REQUESTED]
+      )
+    )
+  }
 }

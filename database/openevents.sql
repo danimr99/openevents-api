@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `events` (
 CREATE TABLE IF NOT EXISTS `friendships` (
   `user_id` int(11) NOT NULL,
   `friend_user_id` int(11) NOT NULL,
-  `status` int(11) NOT NULL DEFAULT 0 COMMENT '0: REQUESTED\n1: ACCEPTED\n2: REJECTED'
+  `status` int(11) NOT NULL DEFAULT 0 COMMENT '0: REQUESTED\n1: ACCEPTED\n'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

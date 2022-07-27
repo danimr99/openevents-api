@@ -1,8 +1,8 @@
 import { FriendshipStatus } from './friendship_status'
 
 export interface Friendship {
-  userId: number
-  friendUserId: number
+  user_id: number
+  friend_user_id: number
   status: FriendshipStatus
 }
 
