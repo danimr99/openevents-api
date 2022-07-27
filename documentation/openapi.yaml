@@ -370,6 +370,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseMessage'
+        "400":
+          description: Authenticated user is trying to send a message to itself.
+        "404":
+          description: Receiver of the message does not exist or was not found.
     get:
       tags:
         - messages
@@ -382,8 +386,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseMessage'
-
+                $ref: '#/components/schemas/ResponseListMessage'
+        "400":
+          description: Authenticated user is trying to get a chat with itself.
+        "404": 
+          description: External user does not exist or was not found.
 
   /messages/users:
     get:

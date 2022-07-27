@@ -31,55 +31,64 @@ router.post('/', authenticateJWT, parseAllMessage, async (_req: Request, res: Re
     _original: message
   }
 
-  // TODO: Avoid a user to send a message to itself
+  // Check if authenticated user is trying to send a message to itself
+  if (message.senderUserId === message.receiverUserId) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_CANNOT_SEND_MESSAGE_ITSELF,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Check if exists message receiver user
+    await existsUserById(message.receiverUserId)
+      .then(async (existsReceiver) => {
+        if (existsReceiver) {
+          // Create message
+          await createMessage(message)
+            .then(() => {
+              // Send response
+              res.status(HttpStatusCode.CREATED).json({
+                sender_user_id: message.senderUserId,
+                receiver_user_id: message.receiverUserId,
+                content: message.content,
+                timestamp: message.timestamp
+              })
+            }).catch((error) => {
+              // Add error thrown to stacktrace
+              stacktrace.error_sql = formatErrorSQL(error)
 
-  // Check if exists message receiver user
-  await existsUserById(message.receiverUserId)
-    .then(async (existsReceiver) => {
-      if (existsReceiver) {
-        // Create message
-        await createMessage(message)
-          .then(() => {
-            // Send response
-            res.status(HttpStatusCode.CREATED).json({
-              sender_user_id: message.senderUserId,
-              receiver_user_id: message.receiverUserId,
-              content: message.content,
-              timestamp: message.timestamp
-            })
-          }).catch((error) => {
-            // Add error thrown to stacktrace
-            stacktrace.error_sql = formatErrorSQL(error)
-
-            next(
-              new ErrorAPI(
-                DatabaseMessage.ERROR_INSERTING_MESSAGE,
-                HttpStatusCode.INTERNAL_SERVER_ERROR,
-                stacktrace
+              next(
+                new ErrorAPI(
+                  DatabaseMessage.ERROR_INSERTING_MESSAGE,
+                  HttpStatusCode.INTERNAL_SERVER_ERROR,
+                  stacktrace
+                )
               )
+            })
+        } else {
+          next(
+            new ErrorAPI(
+              APIMessage.ERROR_MESSAGE_RECEIVER_NOT_FOUND,
+              HttpStatusCode.NOT_FOUND,
+              stacktrace
             )
-          })
-      } else {
+          )
+        }
+      }).catch((error) => {
+        // Add thrown error to stacktrace
+        stacktrace.error_sql = formatErrorSQL(error)
+
         next(
           new ErrorAPI(
-            APIMessage.ERROR_MESSAGE_RECEIVER_NOT_FOUND,
-            HttpStatusCode.NOT_FOUND,
+            DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+            HttpStatusCode.INTERNAL_SERVER_ERROR,
             stacktrace
           )
         )
-      }
-    }).catch((error) => {
-      // Add thrown error to stacktrace
-      stacktrace.error_sql = formatErrorSQL(error)
-
-      next(
-        new ErrorAPI(
-          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
-          HttpStatusCode.INTERNAL_SERVER_ERROR,
-          stacktrace
-        )
-      )
-    })
+      })
+  }
 })
 
 /**
