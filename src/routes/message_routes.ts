@@ -9,7 +9,7 @@ import { DatabaseMessage } from '../models/enums/database_messages'
 import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllMessage } from '../middlewares/parser'
 
-import { createMessage } from '../controllers/message_controller'
+import { createMessage, getUserContacts } from '../controllers/message_controller'
 import { existsUserById } from '../controllers/user_controller'
 
 import { formatErrorSQL } from '../utils/database'
@@ -73,6 +73,40 @@ router.post('/', authenticateJWT, parseAllMessage, async (_req: Request, res: Re
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all external users that have a chat with the authenticated user.
+ * HTTP Method: GET
+ * Endpoint: "/messages/users"
+ */
+router.get('/users', authenticateJWT, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: authenticatedUserId
+    }
+  }
+
+  // Get all users that have a chat with the authenticated user
+  await getUserContacts(authenticatedUserId)
+    .then((users) => {
+      res.status(HttpStatusCode.OK).json(users)
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_SELECTING_CHAT_USERS,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
