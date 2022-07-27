@@ -370,6 +370,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseMessage'
+    get:
+      tags:
+        - messages
+      summary: Gets all messages exchanged between the authenticated user and an external user.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of messages that form the chat between both users.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseMessage'
+
 
   /messages/users:
     get:
@@ -625,4 +639,23 @@ components:
         timestamp:
           type: string
           example: "2022-07-24T12:18:11.470Z"
-        
+    ResponseListMessage:
+      type: array
+      items:
+        type: object
+        properties:
+          id: 
+            type: number
+            example: 1
+          sender_user_id:
+            type: number
+            example: 1
+          receiver_user_id:
+            type: number
+            example: 2
+          content:
+            type: string
+            example: "Hey there! What's up?"
+          timestamp:
+            type: string
+            example: "2022-07-24T12:18:11.470Z"

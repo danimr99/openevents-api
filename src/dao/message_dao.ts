@@ -41,4 +41,28 @@ export class MessageDAO {
       })
     )
   }
+
+  /**
+   * Function to get all the {@link Message}s exchanged between the
+   * authenticated {@link User} and an external {@link User}.
+   * @param {number} authenticatedUserId - ID of the authenticated user.
+   * @param {number} externalUserId - ID of the external user.
+   * @returns {Promise<Message[]>} List of messages exchanged between specified users.
+   */
+  async getChat (authenticatedUserId: number, externalUserId: number): Promise<Message[]> {
+    let result: Message[]
+
+    return await Promise<Message[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM messages WHERE (sender_user_id = ? OR receiver_user_id = ?) ' +
+        'AND (sender_user_id = ? OR receiver_user_id = ?)',
+        [authenticatedUserId, authenticatedUserId, externalUserId, externalUserId]
+      ).then(([rows]) => {
+        // Convert from database result object to message
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

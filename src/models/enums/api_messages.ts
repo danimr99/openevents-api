@@ -25,4 +25,6 @@ export enum APIMessage {
   EVENT_DELETED_SUCCESSFULLY = 'Event was deleted successfully',
   ERROR_INVALID_MESSAGE_FIELDS = 'All message information must be properly fulfilled',
   ERROR_MESSAGE_RECEIVER_NOT_FOUND = 'Message receiver does not exist or was not found',
+  ERROR_CANNOT_SEND_MESSAGE_ITSELF = 'You cannot send a message to yourself',
+  ERROR_CANNOT_GET_CHAT_WITH_ITSELF = 'You cannot get a chat with yourself'
 }
