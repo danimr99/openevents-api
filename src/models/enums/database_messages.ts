@@ -17,5 +17,6 @@ export enum DatabaseMessage {
   ERROR_DELETING_EVENT = 'An error has occurred while deleting an event from the database',
   ERROR_INSERTING_MESSAGE = 'An error has occurred while inserting a new message on the database',
   ERROR_SELECTING_USER_CONTACTS = 'An error has occurred while fetching all the contacts of a user from the database',
-  ERROR_SELECTING_USERS_CHAT = 'An error has occurred while fetching all the messages of a chat from the database'
+  ERROR_SELECTING_USERS_CHAT = 'An error has occurred while fetching all the messages of a chat from the database',
+  ERROR_SELECTING_FRIENDSHIP_REQUESTS = 'An error has occurred while fetching all the friend requests of a user from the database'
 }
