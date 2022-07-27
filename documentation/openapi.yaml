@@ -423,6 +423,21 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
 
+  /friendships:
+    get:
+      tags:
+        - friendships
+      summary: Gets all friends of the authenticated user.
+      security: 
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of friends of the authenticated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListUserWithId'
+
 components:
   securitySchemes:
     BearerAuth:
