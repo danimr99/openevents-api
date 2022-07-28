@@ -544,6 +544,38 @@ paths:
         "404":
           description: External user does not exist or was not found.
 
+  /assistances/{user_id}/{event_id}:
+    get:
+      tags:
+        - Assistances
+      summary: Gets the assistance of a user for an event.
+      security: 
+        - BearerAuth: []
+      parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the user
+          - in: path
+            name: event_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the event
+      responses:
+        "200":
+          description: Assistance of the specified user for the specified event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListAssistance'
+        "400":
+          description: User ID or event ID are not valid.
+        "404":
+          description: User or event does not exist or was not found.
+
 components:
   securitySchemes:
     BearerAuth:
@@ -801,3 +833,20 @@ components:
           timestamp:
             type: string
             example: "2022-07-24T12:18:11.470Z"
+    ResponseListAssistance:
+      type: array
+      items:
+        type: object
+        properties:
+          user_id:
+            type: number
+            example: 1
+          event_id:
+            type: number
+            example: 18
+          rating:
+            type: number
+            example: 8
+          comment:
+            type: string
+            example: "Good music!"

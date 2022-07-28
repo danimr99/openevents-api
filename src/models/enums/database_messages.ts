@@ -22,5 +22,6 @@ export enum DatabaseMessage {
   ERROR_SELECTING_FRIENDS = 'An error has occurred while fetching all the friends of a user from the database',
   ERROR_INSERTING_FRIEND_REQUEST = 'An error has occurred while creating a new friend request to the database',
   ERROR_UPDATING_FRIEND_REQUEST = 'An error has occurred while accepting a friend request from the database',
-  ERROR_DELETING_FRIEND_REQUEST = 'An error has occurred while deleting a friendship or a friend request from the database'
+  ERROR_DELETING_FRIEND_REQUEST = 'An error has occurred while deleting a friendship or a friend request from the database',
+  ERROR_SELECTING_USER_ASSISTANCE_FOR_EVENT = 'An error has occurred while fetching an assistance of a user for an event from the database'
 }

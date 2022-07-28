@@ -211,7 +211,7 @@ export const parseUserId = (req: Request, res: Response, next: NextFunction): vo
 
   // Check if user ID is a number
   if (!isNumber(userId)) {
-  // Set the user ID received
+    // Set the user ID received
     stacktrace._original.user_id = req.params.user_id
 
     next(

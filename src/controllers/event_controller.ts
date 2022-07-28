@@ -25,11 +25,11 @@ export const createEvent = async (event: Event): Promise<void> => {
 
 /**
  * Function to get an event by ID.
- * @param {number} id - ID to search.
+ * @param {number} eventId - ID to search.
  * @returns {Promise<EventWithId[]>} List of events by ID.
  */
-export const getEventsById = async (id: number): Promise<EventWithId[]> => {
-  return await eventDAO.getEventById(id).then((result) => result)
+export const getEventsById = async (eventId: number): Promise<EventWithId[]> => {
+  return await eventDAO.getEventById(eventId).then((result) => result)
 }
 
 /**
@@ -58,12 +58,12 @@ export const getEventsBySearch = async (title: string, location: string): Promis
 
 /**
  * Function to update the information of an {@link Event} on the database.
- * @param {number} id - ID of the event to update.
+ * @param {number} eventId - ID of the event to update.
  * @param {Event} event - Event with the updated information.
  */
-export const updateEventInformation = async (id: number, event: Event): Promise<EventWithId> => {
+export const updateEventInformation = async (eventId: number, event: Event): Promise<EventWithId> => {
   // Get user by ID with the existing information
-  const existingEvent = await getEventsById(id)
+  const existingEvent = await getEventsById(eventId)
     .then((events) => {
       return events[0]
     })
@@ -121,18 +121,18 @@ export const updateEventInformation = async (id: number, event: Event): Promise<
 
 /**
  * Function to check if an {@link Event} exists by ID.
- * @param {number} id - ID of the event to check.
+ * @param {number} eventId - ID of the event to check.
  * @returns {boolean} True if an event with the specified ID exists, false otherwise.
  */
-export const existsEventById = async (id: number): Promise<boolean> => {
-  if (isNumber(id)) {
+export const existsEventById = async (eventId: number): Promise<boolean> => {
+  if (isNumber(eventId)) {
     // Get event by id
-    const eventsList = await getEventsById(id)
+    const eventsList = await getEventsById(eventId)
 
     // Check if user has data
     if (isObject(eventsList) && eventsList.length > 0) {
       // Check if ID matches
-      return eventsList[0].id === id
+      return eventsList[0].id === eventId
     }
   }
 
@@ -172,8 +172,8 @@ export const isUserEventOwner = async (userId: number, eventId: number): Promise
 
 /**
  * Fucntion to delete an {@link EventWithId} from the database.
- * @param {number} id - ID of the event to delete.
+ * @param {number} eventId - ID of the event to delete.
  */
-export const deleteEvent = async (id: number): Promise<void> => {
-  await eventDAO.deleteEventById(id)
+export const deleteEvent = async (eventId: number): Promise<void> => {
+  await eventDAO.deleteEventById(eventId)
 }
