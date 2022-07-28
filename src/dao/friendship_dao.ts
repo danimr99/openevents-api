@@ -103,4 +103,19 @@ export class FriendshipDAO {
       )
     )
   }
+
+  /**
+   * Function to delete a friend request or a friendship between users.
+   * @param {number} userId - ID of a user.
+   * @param {number} externalUserId - ID of another user.
+   */
+  async deleteFriendRequest (userId: number, externalUserId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Insert friend request to the database
+      databaseConnection.promise().query(
+        'DELETE FROM friendships WHERE (user_id = ? AND friend_user_id = ?) OR (user_id = ? AND friend_user_id = ?)',
+        [userId, externalUserId, externalUserId, userId]
+      )
+    )
+  }
 }

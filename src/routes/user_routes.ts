@@ -333,7 +333,7 @@ router.delete('/', authenticateJWT, async (_req: Request, res: Response, next: N
     .then(() => {
       // Send response
       res.status(HttpStatusCode.OK).json({
-        message: APIMessage.USER_DELETED_SUCCESSFULLY
+        message: APIMessage.USER_DELETED
       })
     }).catch((error) => {
       // Add thrown error to stacktrace

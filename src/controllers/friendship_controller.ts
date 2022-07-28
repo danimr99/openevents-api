@@ -1,11 +1,13 @@
 import { Friendship } from '../models/friendship/friendship'
-
-import { FriendshipDAO } from '../dao/friendship_dao'
+import { FriendshipStatus } from '../models/friendship/friendship_status'
 import { PublicUser } from '../models/user/user'
 import { APIMessage } from '../models/enums/api_messages'
-import { FriendshipStatus } from '../models/friendship/friendship_status'
+
+import { FriendshipDAO } from '../dao/friendship_dao'
+import { MessageDAO } from '../dao/message_dao'
 
 const friendshipDAO = new FriendshipDAO()
+const messageDAO = new MessageDAO()
 
 /**
  * Function to get all the pending {@link Friendship} requests
@@ -116,6 +118,32 @@ export const acceptFriendRequest = async (userId: number, externalUserId: number
             return APIMessage.FRIEND_REQUEST_ACCEPTED
           }
         }
+      } else {
+        // Friend request does not exist
+        return APIMessage.FRIEND_REQUEST_NOT_FOUND
+      }
+    })
+}
+
+/**
+ * Function to delete a friend request or a friendship.
+ * @param userId - ID of a user.
+ * @param externalUserId - ID of another user.
+ * @returns {Promise<string>} Message notification informing of the action completed.
+ */
+export const deleteFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
+  return await friendshipDAO.getFriendRequest(userId, externalUserId)
+    .then(async (friendRequests) => {
+    // Check if exists friend request between users
+      if (friendRequests.length === 1) {
+        // Friend request exists
+        // Delete friend request
+        await friendshipDAO.deleteFriendRequest(userId, externalUserId)
+
+        // Delete chat between users
+        await messageDAO.deleteChat(userId, externalUserId)
+
+        return APIMessage.FRIEND_REQUEST_DELETED
       } else {
         // Friend request does not exist
         return APIMessage.FRIEND_REQUEST_NOT_FOUND

@@ -330,7 +330,7 @@ router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request,
         .then(() => {
           // Send response
           res.status(HttpStatusCode.OK).json({
-            message: APIMessage.EVENT_DELETED_SUCCESSFULLY
+            message: APIMessage.EVENT_DELETED
           })
         }).catch((error) => {
           // Add thrown error to stacktrace

@@ -512,6 +512,37 @@ paths:
           description: Authenticated user has tried to accept a friend request from itself.
         "404":
           description: External user does not exist or was not found.
+    delete:
+      tags:
+        - Friendships
+      summary: Deletes a friend request between the authenticated user and the external user.
+      description: Used to delete a friend request regardless of its status or a friendship (when a friend request is accepted).
+        In case exists, it also deletes all the messages exchanged between both users.
+      security: 
+        - BearerAuth: []
+      parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the external user
+      responses:
+        "200":
+          description: Message notification informing whether friendship or friend request was deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  stacktrace:
+                    type: object
+        "400":
+          description: Authenticated user has tried to delete a friend request with itself.
+        "404":
+          description: External user does not exist or was not found.
 
 components:
   securitySchemes:

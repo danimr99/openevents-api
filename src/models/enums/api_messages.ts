@@ -16,13 +16,13 @@ export enum APIMessage {
   INVALID_CREDENTIALS = 'Invalid email address or password',
   INVALID_USER_ID = 'Invalid user ID',
   USER_NOT_FOUND = 'User does not exist or was not found',
-  USER_DELETED_SUCCESSFULLY = 'User was deleted successfully',
+  USER_DELETED = 'User has been deleted',
   ERROR_INVALID_EVENT_FIELDS = 'All event information must be properly fulfilled',
   INVALID_EVENT_ID = 'Invalid event ID',
   EVENT_NOT_FOUND = 'Event does not exist or was not found',
   ERROR_INVALID_EVENT_SEARCH_FIELDS = 'Event search fields must be properly fulfilled',
   ERROR_USER_NOT_EVENT_OWNER = 'Authenticated user is not the owner of the event',
-  EVENT_DELETED_SUCCESSFULLY = 'Event was deleted successfully',
+  EVENT_DELETED = 'Event has been deleted',
   ERROR_INVALID_MESSAGE_FIELDS = 'All message information must be properly fulfilled',
   ERROR_MESSAGE_RECEIVER_NOT_FOUND = 'Message receiver does not exist or was not found',
   ERROR_CANNOT_SEND_MESSAGE_ITSELF = 'You cannot send a message to yourself',
@@ -33,6 +33,8 @@ export enum APIMessage {
   FRIEND_REQUEST_SENT = 'Friend request has been sent',
   ALREADY_FRIENDS = 'You are already friends',
   ERROR_CANNOT_ACCEPT_FRIEND_REQUEST_ITSELF = 'You cannot accept a friend request from yourself',
-  FRIEND_REQUEST_NOT_FOUND = 'Friend request does not exist or was not found',
-  FRIEND_REQUEST_MUST_BE_ACCEPTED_BY_EXTERNAL_USER = 'You must wait until the user accepts your friend request'
+  FRIEND_REQUEST_NOT_FOUND = 'Friend request or friendship does not exist or was not found',
+  FRIEND_REQUEST_MUST_BE_ACCEPTED_BY_EXTERNAL_USER = 'You must wait until the user accepts your friend request',
+  ERROR_CANNOT_DELETE_FRIEND_REQUEST_ITSELF = 'You cannot delete or reject a friendship with yourself',
+  FRIEND_REQUEST_DELETED = 'Friend request or friendship has been deleted'
 }

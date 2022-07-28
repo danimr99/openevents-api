@@ -25,10 +25,19 @@ export const getUserContacts = async (userId: number): Promise<PublicUser[]> => 
 /**
  * Function to get all the {@link Message}s exchanged between the
  * authenticated {@link User} and an external {@link User}.
- * @param {number} authenticatedUserId - ID of the authenticated user.
+ * @param {number} userId - ID of a user.
  * @param {number} externalUserId - ID of the external user.
  * @returns {Promise<Message[]>} List of messages exchanged between specified users.
  */
-export const getChat = async (authenticatedUserId: number, externalUserId: number): Promise<Message[]> => {
-  return await messageDAO.getChat(authenticatedUserId, externalUserId).then((messages) => messages)
+export const getChat = async (userId: number, externalUserId: number): Promise<Message[]> => {
+  return await messageDAO.getChat(userId, externalUserId).then((messages) => messages)
+}
+
+/**
+ * Function delete all messages exchanged between users.
+ * @param {number} userId - ID of a user.
+ * @param {number} externalUserId - ID of another user.
+ */
+export const deleteChat = async (userId: number, externalUserId: number): Promise<any> => {
+  return await messageDAO.deleteChat(userId, externalUserId)
 }

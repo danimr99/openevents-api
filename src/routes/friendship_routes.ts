@@ -9,8 +9,8 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseUserId } from '../middlewares/parser'
 
 import {
-  acceptFriendRequest, createFriendRequest, getFriends,
-  getFriendshipRequests
+  acceptFriendRequest, createFriendRequest, deleteFriendRequest,
+  getFriends, getFriendshipRequests
 } from '../controllers/friendship_controller'
 import { existsUserById } from '../controllers/user_controller'
 
@@ -213,12 +213,84 @@ router.put('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res:
                 stacktrace
               })
             }).catch((error) => {
-            // Add thrown error to stacktrace
+              // Add thrown error to stacktrace
               stacktrace.error_sql = formatErrorSQL(error)
 
               next(
                 new ErrorAPI(
                   DatabaseMessage.ERROR_UPDATING_FRIEND_REQUEST,
+                  HttpStatusCode.INTERNAL_SERVER_ERROR,
+                  stacktrace
+                )
+              )
+            })
+        } else {
+          next(
+            new ErrorAPI(
+              APIMessage.USER_NOT_FOUND,
+              HttpStatusCode.NOT_FOUND,
+              stacktrace
+            )
+          )
+        }
+      })
+  }
+})
+
+/**
+ * Route that deletes a friend request or friendship between external user and authenticated user.
+ * HTTP Method: DELETE
+ * Endpoint: "/friendships/{user_id}"
+ */
+router.delete('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Get the ID of the external user
+  const externalUserId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: authenticatedUserId,
+      external_user_id: externalUserId
+    }
+  }
+
+  // Check if authenticated user is trying to delete a friend request from itself
+  if (authenticatedUserId === externalUserId) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_CANNOT_DELETE_FRIEND_REQUEST_ITSELF,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Check if external user exists
+    await existsUserById(externalUserId)
+      .then(async (existsExternalUser) => {
+        if (existsExternalUser) {
+          // Delete friendship or friend request
+          await deleteFriendRequest(authenticatedUserId, externalUserId)
+            .then((actionMessage) => {
+              let httpStatusCode: HttpStatusCode = HttpStatusCode.OK
+
+              if (actionMessage === APIMessage.FRIEND_REQUEST_NOT_FOUND) {
+                httpStatusCode = HttpStatusCode.NOT_FOUND
+              }
+              // Send response
+              res.status(httpStatusCode).json({
+                message: actionMessage,
+                stacktrace
+              })
+            }).catch((error) => {
+              // Add thrown error to stacktrace
+              stacktrace.error_sql = formatErrorSQL(error)
+
+              next(
+                new ErrorAPI(
+                  DatabaseMessage.ERROR_DELETING_FRIEND_REQUEST,
                   HttpStatusCode.INTERNAL_SERVER_ERROR,
                   stacktrace
                 )

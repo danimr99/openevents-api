@@ -49,20 +49,36 @@ export class MessageDAO {
    * @param {number} externalUserId - ID of the external user.
    * @returns {Promise<Message[]>} List of messages exchanged between specified users.
    */
-  async getChat (authenticatedUserId: number, externalUserId: number): Promise<Message[]> {
+  async getChat (userId: number, externalUserId: number): Promise<Message[]> {
     let result: Message[]
 
     return await Promise<Message[]>.resolve(
       // Query to database
       databaseConnection.promise().query(
-        'SELECT * FROM messages WHERE (sender_user_id = ? OR receiver_user_id = ?) ' +
-        'AND (sender_user_id = ? OR receiver_user_id = ?)',
-        [authenticatedUserId, authenticatedUserId, externalUserId, externalUserId]
+        'SELECT * FROM messages WHERE (sender_user_id = ? AND receiver_user_id = ?) ' +
+        'OR (sender_user_id = ? OR receiver_user_id = ?)',
+        [userId, externalUserId, externalUserId, userId]
       ).then(([rows]) => {
         // Convert from database result object to message
         result = JSON.parse(JSON.stringify(rows))
         return result
       })
+    )
+  }
+
+  /**
+   * Function to delete a chat between users.
+   * @param {number} userId - ID of a user.
+   * @param {number} externalUserId - ID of another user.
+   */
+  async deleteChat (userId: number, externalUserId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Insert into database
+      databaseConnection.promise().query(
+        'DELETE FROM messages WHERE (sender_user_id = ? AND receiver_user_id = ?) ' +
+        'OR (sender_user_id = ? AND receiver_user_id = ?)',
+        [userId, externalUserId, externalUserId, userId]
+      )
     )
   }
 }
