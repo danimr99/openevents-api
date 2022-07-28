@@ -16,7 +16,7 @@ paths:
   /users:
     post:
       tags:
-      - users
+      - Users
       summary: Creates a user.
       description: Inserts into database the user received from the request body in JSON format.
       security: []
@@ -38,7 +38,7 @@ paths:
           description: Already exists a user with the same email address as the specified or any of the user fields is missing or does not meet the requirements to be considered as valid.
     get:
       tags:
-      - users
+      - Users
       summary: Gets all users.
       description: Gets all users from the database without their password.
       security:
@@ -52,7 +52,7 @@ paths:
                 $ref: '#/components/schemas/ResponseListUserWithId'
     put:
       tags:
-        - users
+        - Users
       summary: Edits specified fields of the authenticated user.
       security:
         - BearerAuth: []
@@ -72,7 +72,7 @@ paths:
                 $ref: '#/components/schemas/ResponseUserWithId'
     delete:
       tags:
-        - users
+        - Users
       summary: Deletes the authenticated user and all the information related with it.
       description: Besides deleting the user, it also deletes all the events where the user is the owner,
         all the assistances created by the user, all the friendships where the deleted user is related and all
@@ -95,7 +95,7 @@ paths:
   /users/login:
         post:
           tags:
-          - users
+          - Users
           summary: Authenticates a user.
           description: Checks whether credentials are valid or not. If credentials are valid, generates an authentication token.
           security: []
@@ -139,7 +139,7 @@ paths:
   /users/{user_id}:
       get:
         tags:
-          - users
+          - Users
         summary: Gets a user by ID.
         security:
           - BearerAuth: []
@@ -164,7 +164,7 @@ paths:
   /users/search:
     get:
       tags:
-        - users
+        - Users
       summary: Searches users with a name, last name or email matching the value of the query parameter.
       security:
           - BearerAuth: []
@@ -188,7 +188,7 @@ paths:
   /events:
     get:
       tags:
-        - events
+        - Events
       summary: Gets all future events.
       description: Gets all the events whose start date is greater than now. 
       security:
@@ -202,7 +202,7 @@ paths:
                 $ref: '#/components/schemas/ResponseListEventWithId'
     post:
       tags:
-        - events
+        - Events
       summary: Creates an event.
       description: Depending on some parameters, there are fields that can be optional. 
         If an event is online, the link is required and the location and the max_attendees are optional.
@@ -227,7 +227,7 @@ paths:
   /events/search:
     get:
       tags:
-        - events
+        - Events
       summary: Searches events with a title and/or location matching the value of the queries parameters.
       security:
           - BearerAuth: []
@@ -257,7 +257,7 @@ paths:
   /events/{event_id}:
       get:
         tags:
-          - events
+          - Events
         summary: Gets an event by ID.
         security:
           - BearerAuth: []
@@ -279,7 +279,7 @@ paths:
             description: Event does not exist or was not found.
       put:
         tags:
-          - events
+          - Events
         summary: Edits specified fields of an event if the authenticated user is the owner of the event.
         security:
           - BearerAuth: []
@@ -312,7 +312,7 @@ paths:
             description: Specified event does not exist or was not found.
       delete:
         tags:
-          - events
+          - Events
         summary: Deletes an event with matching ID.
         description: Deletes an event by ID if the authenticated user is the owner of it.
         security:
@@ -344,7 +344,7 @@ paths:
   /messages:
     post:
       tags:
-        - messages
+        - Messages
       summary: Creates a message.
       description: Creates a message sent by the authenticated user to another one.
       security:
@@ -376,7 +376,7 @@ paths:
           description: Receiver of the message does not exist or was not found.
     get:
       tags:
-        - messages
+        - Messages
       summary: Gets all messages exchanged between the authenticated user and an external user.
       security:
         - BearerAuth: []
@@ -395,7 +395,7 @@ paths:
   /messages/users:
     get:
       tags: 
-        - messages
+        - Messages
       summary: Gets all the contacts of the authenticated user.
       description: Gets all the users that have received or sent a message to the authenticated user.
       security:
@@ -411,7 +411,7 @@ paths:
   /friendships/requests:
     get:
       tags:
-        - friendships
+        - Friendships
       summary: Gets all the users that have sent a friendship request to the authenticated user and its status is still pending.
       security: 
         - BearerAuth: []
@@ -426,7 +426,7 @@ paths:
   /friendships:
     get:
       tags:
-        - friendships
+        - Friendships
       summary: Gets all friends of the authenticated user.
       security: 
         - BearerAuth: []
@@ -441,7 +441,7 @@ paths:
   /friendships/{user_id}:
     post:
       tags:
-        - friendships
+        - Friendships
       summary: Creates a friend request to an external user from an authenticated user.
       description: Creates a friend request to an external user. In case the external user has already sent a 
         friend request to the authenticated user, it is accepted.
@@ -481,7 +481,37 @@ paths:
         "400":
           description: Authenticated user has tried to send a friend request to itself.
         "404":
-          description: External user does not exist or was not found.  
+          description: External user does not exist or was not found.
+    put:
+      tags:
+        - Friendships
+      summary: Accepts a friend request from an external user to an authenticated user.
+      security: 
+        - BearerAuth: []
+      parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the external user
+      responses:
+        "200":
+          description: Message notification informing whether users were already friends, friend request was accepted or
+            friend request must be accepted by the external user.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  stacktrace:
+                    type: object
+        "400":
+          description: Authenticated user has tried to accept a friend request from itself.
+        "404":
+          description: External user does not exist or was not found.
 
 components:
   securitySchemes:

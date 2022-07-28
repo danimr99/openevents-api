@@ -8,7 +8,10 @@ import { DatabaseMessage } from '../models/enums/database_messages'
 import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseUserId } from '../middlewares/parser'
 
-import { createFriendRequest, getFriends, getFriendshipRequests } from '../controllers/friendship_controller'
+import {
+  acceptFriendRequest, createFriendRequest, getFriends,
+  getFriendshipRequests
+} from '../controllers/friendship_controller'
 import { existsUserById } from '../controllers/user_controller'
 
 import { formatErrorSQL } from '../utils/database'
@@ -142,6 +145,80 @@ router.post('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res
               next(
                 new ErrorAPI(
                   DatabaseMessage.ERROR_INSERTING_FRIEND_REQUEST,
+                  HttpStatusCode.INTERNAL_SERVER_ERROR,
+                  stacktrace
+                )
+              )
+            })
+        } else {
+          next(
+            new ErrorAPI(
+              APIMessage.USER_NOT_FOUND,
+              HttpStatusCode.NOT_FOUND,
+              stacktrace
+            )
+          )
+        }
+      })
+  }
+})
+
+/**
+ * Route that accepts a friend request from external user to authenticated user.
+ * HTTP Method: PUT
+ * Endpoint: "/friendships/{user_id}"
+ */
+router.put('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Get the ID of the external user
+  const externalUserId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: authenticatedUserId,
+      external_user_id: externalUserId
+    }
+  }
+
+  // Check if authenticated user is trying to accept a friend request from itself
+  if (authenticatedUserId === externalUserId) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_CANNOT_ACCEPT_FRIEND_REQUEST_ITSELF,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Check if external user exists
+    await existsUserById(externalUserId)
+      .then(async (existsExternalUser) => {
+        if (existsExternalUser) {
+          // Accept friend request
+          await acceptFriendRequest(authenticatedUserId, externalUserId)
+            .then((actionMessage) => {
+              // Get the HTTP status code
+              let httpStatusCode: HttpStatusCode = HttpStatusCode.OK
+
+              if (actionMessage === APIMessage.FRIEND_REQUEST_NOT_FOUND) {
+                httpStatusCode = HttpStatusCode.NOT_FOUND
+              }
+
+              // Send response
+              res.status(httpStatusCode).json({
+                message: actionMessage,
+                stacktrace
+              })
+            }).catch((error) => {
+            // Add thrown error to stacktrace
+              stacktrace.error_sql = formatErrorSQL(error)
+
+              next(
+                new ErrorAPI(
+                  DatabaseMessage.ERROR_UPDATING_FRIEND_REQUEST,
                   HttpStatusCode.INTERNAL_SERVER_ERROR,
                   stacktrace
                 )

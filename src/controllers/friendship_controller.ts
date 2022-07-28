@@ -51,7 +51,7 @@ export const existsFriendRequest = async (userId: number, externalUserId: number
 export const createFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
   return await friendshipDAO.getFriendRequest(userId, externalUserId)
     .then(async (friendRequests) => {
-    // Check if exists friend request between users
+      // Check if exists friend request between users
       if (friendRequests.length === 1) {
         // Friend request exists
         const friendRequest = friendRequests[0]
@@ -80,6 +80,45 @@ export const createFriendRequest = async (userId: number, externalUserId: number
         await friendshipDAO.createFriendRequest(userId, externalUserId)
 
         return APIMessage.FRIEND_REQUEST_SENT
+      }
+    })
+}
+
+/**
+ * Function to accept a friend request
+ * @param userId - ID of a user.
+ * @param externalUserId - ID of another user.
+ * @returns {Promise<string>} Message notification informing of the action completed.
+ */
+export const acceptFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
+  return await friendshipDAO.getFriendRequest(userId, externalUserId)
+    .then(async (friendRequests) => {
+      // Check if exists friend request between users
+      if (friendRequests.length === 1) {
+        // Friend request exists
+        const friendRequest = friendRequests[0]
+
+        // Check friend request status
+        if (friendRequest.status === FriendshipStatus.ACCEPTED) {
+          // Friend request is already accepted
+          return APIMessage.ALREADY_FRIENDS
+        } else {
+          // Friend request status is requested
+          // Check friend request sender
+          if (friendRequest.user_id === userId) {
+            // User trying to accept a friend request to external user
+            return APIMessage.FRIEND_REQUEST_MUST_BE_ACCEPTED_BY_EXTERNAL_USER
+          } else {
+            // External user sent friend request to user
+            // User accepts friend request from external user
+            await friendshipDAO.acceptFriendRequest(userId, externalUserId)
+
+            return APIMessage.FRIEND_REQUEST_ACCEPTED
+          }
+        }
+      } else {
+        // Friend request does not exist
+        return APIMessage.FRIEND_REQUEST_NOT_FOUND
       }
     })
 }

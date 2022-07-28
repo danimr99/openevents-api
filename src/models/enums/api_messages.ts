@@ -31,5 +31,8 @@ export enum APIMessage {
   FRIEND_REQUEST_ALREADY_SENT = 'Friend request was already sent to the user',
   FRIEND_REQUEST_ACCEPTED = 'Friend request has been accepted',
   FRIEND_REQUEST_SENT = 'Friend request has been sent',
-  ALREADY_FRIENDS = 'You are already friends'
+  ALREADY_FRIENDS = 'You are already friends',
+  ERROR_CANNOT_ACCEPT_FRIEND_REQUEST_ITSELF = 'You cannot accept a friend request from yourself',
+  FRIEND_REQUEST_NOT_FOUND = 'Friend request does not exist or was not found',
+  FRIEND_REQUEST_MUST_BE_ACCEPTED_BY_EXTERNAL_USER = 'You must wait until the user accepts your friend request'
 }

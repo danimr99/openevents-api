@@ -41,6 +41,7 @@ export const authenticateJWT = (req: Request, res: Response, next: NextFunction)
         existsUserById(decodedJWT.id).then((userExists) => {
           // Check if exists a user with the ID from the received JWT
           if (userExists) {
+            // TODO: Invalidate JWT if password has changed (Add password to JWT payload and compare password on authenticate)
             // Pass user ID to the next middleware
             res.locals.JWT_USER_ID = decodedJWT.id
             next()
