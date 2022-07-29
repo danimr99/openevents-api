@@ -575,6 +575,43 @@ paths:
           description: User ID or event ID are not valid.
         "404":
           description: User or event does not exist or was not found.
+    delete:
+      tags:
+        - Assistances
+      summary: Deletes the assistance of a user for an event if the authenticated user is the event owner.
+      security: 
+        - BearerAuth: []
+      parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the user
+          - in: path
+            name: event_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the event
+      responses:
+        "200":
+          description: Assistance has been deleted.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  stacktrace:
+                    type: object
+        "400":
+          description: User ID or event ID are not valid.
+        "403":
+          description: Authenticated user is not the owner of the specified event.
+        "404":
+          description: User or event does not exist or was not found.
 
 components:
   securitySchemes:

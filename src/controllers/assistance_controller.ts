@@ -13,3 +13,26 @@ const assistanceDAO = new AssistanceDAO()
 export const getUserAssistanceForEvent = async (userId: number, eventId: number): Promise<Assistance[]> => {
   return await assistanceDAO.getUserAssistanceForEvent(userId, eventId).then((assistances) => assistances)
 }
+
+export const existsAssistance = async (userId: number, eventId: number): Promise<boolean> => {
+  return await getUserAssistanceForEvent(userId, eventId)
+    .then((assistances) => {
+    // Check if exists assistance
+      if (assistances.length > 0) {
+        return true
+      } else {
+        return false
+      }
+    }).catch(() => {
+      return false
+    })
+}
+
+/**
+ * Function to delete an {@link Assistance} of a {@link User} for an {@link Event}.
+ * @param {number} userId - ID of the user.
+ * @param {number} eventId - ID of the event.
+ */
+export const deleteUserAssistanceForEvent = async (userId: number, eventId: number): Promise<any> => {
+  return await assistanceDAO.deleteUserAssistanceForEvent(userId, eventId)
+}

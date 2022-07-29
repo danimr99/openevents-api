@@ -36,5 +36,7 @@ export enum APIMessage {
   FRIEND_REQUEST_NOT_FOUND = 'Friend request or friendship does not exist or was not found',
   FRIEND_REQUEST_MUST_BE_ACCEPTED_BY_EXTERNAL_USER = 'You must wait until the user accepts your friend request',
   ERROR_CANNOT_DELETE_FRIEND_REQUEST_ITSELF = 'You cannot delete or reject a friendship with yourself',
-  FRIEND_REQUEST_DELETED = 'Friend request or friendship has been deleted'
+  FRIEND_REQUEST_DELETED = 'Friend request or friendship has been deleted',
+  ASSISTANCE_DELETED = 'Assistance has been deleted',
+  ASSISTANCE_NOT_FOUND = 'Assistance does not exist or was not found'
 }

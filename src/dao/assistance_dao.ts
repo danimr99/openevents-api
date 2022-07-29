@@ -25,4 +25,20 @@ export class AssistanceDAO {
       })
     )
   }
+
+  /**
+   * Function to delete an {@link Assistance} of a {@link User} for an {@link Event}
+   * from the database.
+   * @param {number} userId - ID of the user.
+   * @param {number} eventId - ID of the event.
+   */
+  async deleteUserAssistanceForEvent (userId: number, eventId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Delete event with the specified ID from the database
+      databaseConnection.promise().query(
+        'DELETE FROM assistances WHERE user_id = ? AND event_id = ?',
+        [userId, eventId]
+      )
+    )
+  }
 }
