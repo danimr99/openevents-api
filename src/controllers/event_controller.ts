@@ -177,3 +177,12 @@ export const isUserEventOwner = async (userId: number, eventId: number): Promise
 export const deleteEvent = async (eventId: number): Promise<void> => {
   await eventDAO.deleteEventById(eventId)
 }
+
+/**
+ * Function to get all {@link EventWithId} where a specified user is the owner.
+ * @param ownerId - ID of the owner of the event.
+ * @returns {Promise<EventWithId[]>} List of events where the specified user is the owner.
+ */
+export const getEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+  return await eventDAO.getEventsByOwner(ownerId).then((events) => events)
+}

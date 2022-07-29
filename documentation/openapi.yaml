@@ -156,11 +156,36 @@ paths:
               content:
                 application/json:
                   schema:
-                    $ref: '#/components/schemas/ResponseUserWithId'
-                    
+                    $ref: '#/components/schemas/ResponseUserWithId'  
           "400":
             description: User does not exist or was not found.
             
+  /users/{user_id}/events:
+    get:
+      tags:
+        - Users
+      summary: Gets all the events created by a user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: List of events created by the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithId'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.
+
   /users/search:
     get:
       tags:

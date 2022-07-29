@@ -10,7 +10,7 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parsePartialUser, parseCredentials, parseUserId } from '../middlewares/parser'
 
 import {
-  createUser, deleteUser, existsUserByEmail, getAllUsers, getUsersByEmail, getUsersById,
+  createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUsersByEmail, getUsersById,
   getUsersByTextSearch, updateUserInformation
 } from '../controllers/user_controller'
 
@@ -18,6 +18,7 @@ import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
 import { formatErrorSQL } from '../utils/database'
 import { validateString } from '../utils/validator'
+import { getEventsByOwner } from '../controllers/event_controller'
 
 // Create a router for users
 const router = express.Router()
@@ -342,6 +343,56 @@ router.delete('/', authenticateJWT, async (_req: Request, res: Response, next: N
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_DELETING_USER,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all events created by a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/events"
+ */
+router.get('/:user_id/events', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getEventsByOwner(userId)
+          .then((events) => {
+          // Send response
+            res.status(HttpStatusCode.OK).json(events)
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
