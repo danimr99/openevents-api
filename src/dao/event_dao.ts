@@ -252,4 +252,26 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to get all active {@link EventWithId} where a specified user is the owner
+   * from the database.
+   * @param {number} ownerId - ID of the owner of the event.
+   * @returns {Promise<EventWithId[]>} List of active events where the specified user is the owner.
+   */
+  async getActiveEventsByOwner (ownerId: number): Promise<EventWithId[]> {
+    let result: EventWithId[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM events WHERE owner_id = ? AND start_date < NOW() AND end_date > NOW()',
+        [ownerId]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

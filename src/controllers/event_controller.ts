@@ -204,3 +204,12 @@ export const getFutureEventsByOwner = async (ownerId: number): Promise<EventWith
 export const getFinishedEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getFinishedEventsByOwner(ownerId).then((events) => events)
 }
+
+/**
+ * Function to get all active {@link EventWithId} where a specified user is the owner.
+ * @param ownerId - ID of the owner of the event.
+ * @returns {Promise<EventWithId[]>} List of active events where the specified user is the owner.
+ */
+export const getActiveEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+  return await eventDAO.getActiveEventsByOwner(ownerId).then((events) => events)
+}
