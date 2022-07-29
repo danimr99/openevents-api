@@ -186,3 +186,21 @@ export const deleteEvent = async (eventId: number): Promise<void> => {
 export const getEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getEventsByOwner(ownerId).then((events) => events)
 }
+
+/**
+ * Function to get all future {@link EventWithId} where a specified user is the owner.
+ * @param ownerId - ID of the owner of the event.
+ * @returns {Promise<EventWithId[]>} List of future events where the specified user is the owner.
+ */
+export const getFutureEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+  return await eventDAO.getFutureEventsByOwner(ownerId).then((events) => events)
+}
+
+/**
+ * Function to get all finished {@link EventWithId} where a specified user is the owner.
+ * @param ownerId - ID of the owner of the event.
+ * @returns {Promise<EventWithId[]>} List of finished events where the specified user is the owner.
+ */
+export const getFinishedEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+  return await eventDAO.getFinishedEventsByOwner(ownerId).then((events) => events)
+}

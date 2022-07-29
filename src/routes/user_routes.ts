@@ -18,7 +18,7 @@ import { checkPassword } from '../utils/cypher'
 import { generateAuthenticationToken } from '../utils/authentication'
 import { formatErrorSQL } from '../utils/database'
 import { validateString } from '../utils/validator'
-import { getEventsByOwner } from '../controllers/event_controller'
+import { getEventsByOwner, getFinishedEventsByOwner, getFutureEventsByOwner } from '../controllers/event_controller'
 
 // Create a router for users
 const router = express.Router()
@@ -372,6 +372,106 @@ router.get('/:user_id/events', authenticateJWT, parseUserId, async (_req: Reques
       if (existsUser) {
         // User exists
         await getEventsByOwner(userId)
+          .then((events) => {
+          // Send response
+            res.status(HttpStatusCode.OK).json(events)
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all future events created by a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/events/future"
+ */
+router.get('/:user_id/events/future', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getFutureEventsByOwner(userId)
+          .then((events) => {
+          // Send response
+            res.status(HttpStatusCode.OK).json(events)
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all finished events created by a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/events/finished"
+ */
+router.get('/:user_id/events/finished', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getFinishedEventsByOwner(userId)
           .then((events) => {
           // Send response
             res.status(HttpStatusCode.OK).json(events)

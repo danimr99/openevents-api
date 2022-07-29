@@ -164,7 +164,7 @@ paths:
     get:
       tags:
         - Users
-      summary: Gets all the events created by a user.
+      summary: Gets all events created by a user.
       security:
         - BearerAuth: []
       parameters:
@@ -177,6 +177,58 @@ paths:
       responses:
         "200":
           description: List of events created by the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithId'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.
+
+  /users/{user_id}/events/future:
+    get:
+      tags:
+        - Users
+      summary: Gets all future events created by a user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: List of future events created by the specified user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithId'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.
+
+  /users/{user_id}/events/finished:
+    get:
+      tags:
+        - Users
+      summary: Gets all finished events created by a user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: List of finished events created by the specified user.
           content:
             application/json:
               schema:
