@@ -14,6 +14,7 @@ import {
 } from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
+import { getEventAssistances } from '../controllers/assistance_controller'
 
 // Create a router for events
 const router = express.Router()
@@ -263,7 +264,7 @@ router.put('/:event_id', authenticateJWT, parseEventId, parsePartialEvent, async
  * Endpoint: "/events/{event_id}"
  */
 router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
-// Get authenticated user ID
+  // Get authenticated user ID
   const userId: number = res.locals.JWT_USER_ID
 
   // Get event ID from the URL path sent as parameter
@@ -346,6 +347,67 @@ router.delete('/:event_id', authenticateJWT, parseEventId, async (_req: Request,
         })
     }
   }
+})
+
+/**
+ * Route that gets all assistances for event with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/events/{event_id}/assistances"
+ */
+router.get('/:event_id/assistances', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      event_id: eventId
+    }
+  }
+
+  // Check if event exists
+  await existsEventById(eventId)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+        // Event exists
+        await getEventAssistances(eventId)
+          .then((assistances) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(assistances)
+          }).catch((error) => {
+          // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENT_ASSISTANCES,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // Event does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.EVENT_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
 })
 
 export default router

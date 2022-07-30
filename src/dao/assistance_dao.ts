@@ -41,4 +41,25 @@ export class AssistanceDAO {
       )
     )
   }
+
+  /**
+   * Function to get all assistances of an {@link Event} from the database.
+   * @param {number} eventId - ID of the event.
+   * @returns {Promise<Assistance[]>} List of assistances of the specified event.
+   */
+  async getEventAssistances (eventId: number): Promise<Assistance[]> {
+    let result: Assistance[]
+
+    return await Promise<Assistance[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM assistances WHERE event_id = ?',
+        [eventId]
+      ).then(([rows]) => {
+        // Convert from database result object to assistance
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

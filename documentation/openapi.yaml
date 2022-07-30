@@ -514,7 +514,7 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/ResponseEventWithId'
-          "400":
+          "404":
             description: Event does not exist or was not found.
       put:
         tags:
@@ -548,7 +548,7 @@ paths:
           "403":
             description: Authenticated user trying to modify the specified event is not the owner of it.
           "404":
-            description: Specified event does not exist or was not found.
+            description: Event does not exist or was not found.
       delete:
         tags:
           - Events
@@ -576,9 +576,35 @@ paths:
                       description: Message notifying that the action has been completed successfully.
                       example: "Event was deleted successfully"
           "403":
-            description: Authenticated user is not the owner of the specified event.
+            description: Authenticated user is not the owner of the event.
           "404":
-            description: Event to be deleted does not exist or was not found.
+            description: Event does not exist or was not found.
+
+  /events/{event_id}/assistances:
+    get:
+      tags:
+        - Events
+      summary: Gets an event by ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
+      responses:
+        "200":
+          description: List of assistances for the specified event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListAssistance'
+        "400":
+          description: Invalid event ID.
+        "404":
+          description: Event does not exist or was not found.
 
   /messages:
     post:
@@ -848,7 +874,7 @@ paths:
         "400":
           description: User ID or event ID are not valid.
         "403":
-          description: Authenticated user is not the owner of the specified event.
+          description: Authenticated user is not the owner of the event.
         "404":
           description: User or event does not exist or was not found.
 

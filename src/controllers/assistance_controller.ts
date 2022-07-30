@@ -43,3 +43,12 @@ export const existsAssistance = async (userId: number, eventId: number): Promise
 export const deleteUserAssistanceForEvent = async (userId: number, eventId: number): Promise<any> => {
   return await assistanceDAO.deleteUserAssistanceForEvent(userId, eventId)
 }
+
+/**
+ * Function to get all assistances of an {@link Event}.
+ * @param {number} eventId -  ID of the event.
+ * @returns {Promise<Assistance[]>} List of assistances of the specified event.
+ */
+export const getEventAssistances = async (eventId: number): Promise<Assistance[]> => {
+  return await assistanceDAO.getEventAssistances(eventId).then((assistances) => assistances)
+}
