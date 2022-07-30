@@ -29,5 +29,9 @@ export enum DatabaseMessage {
   ERROR_SELECTING_FUTURE_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all future events created by a user from the database',
   ERROR_SELECTING_FINISHED_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all finished events created by a user from the database',
   ERROR_SELECTING_ACTIVE_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all active events created by a user from the database',
-  ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all events attended by a user along with the comment and rating given from the database'
+  ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all events attended by a user along with the comment and rating given from the database',
+  ERROR_SELECTING_FUTURE_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all future events attended by a user along with the comment and rating given from the database',
+  ERROR_SELECTING_FINISHED_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all finished events attended by a user along with the comment and rating given from the database',
+  ERROR_SELECTING_ACTIVE_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all active events attended by a user along with the comment and rating given from the database',
+  ERROR_SELECTING_USER_FRIENDS = 'An error has occurred while fetching all friends of a user from the database'
 }

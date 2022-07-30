@@ -158,3 +158,12 @@ export const deleteUser = async (id: number): Promise<void> => {
   // TODO: Delete all the friendships related with the deleted user
   // TODO: Delete all the messages sent and received by the deleted user
 }
+
+/**
+ * Function to get all friends of a {@link User}.
+ * @param {number} userId - ID of the user.
+ * @returns {Promise<PublicUser[]>} List of friends of the specified user.
+ */
+export const getUserFriends = async (userId: number): Promise<PublicUser[]> => {
+  return await userDAO.getUserFriends(userId).then((friends) => friends)
+}

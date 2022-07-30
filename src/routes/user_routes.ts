@@ -10,7 +10,7 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parsePartialUser, parseCredentials, parseUserId } from '../middlewares/parser'
 
 import {
-  createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUsersByEmail, getUsersById,
+  createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUserFriends, getUsersByEmail, getUsersById,
   getUsersByTextSearch, updateUserInformation
 } from '../controllers/user_controller'
 import {
@@ -690,7 +690,7 @@ router.get('/:user_id/assistances/future', authenticateJWT, parseUserId, async (
 
             next(
               new ErrorAPI(
-                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                DatabaseMessage.ERROR_SELECTING_FUTURE_EVENTS_AND_ASSISTANCES_USER,
                 HttpStatusCode.INTERNAL_SERVER_ERROR,
                 stacktrace
               )
@@ -751,7 +751,7 @@ router.get('/:user_id/assistances/finished', authenticateJWT, parseUserId, async
 
             next(
               new ErrorAPI(
-                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                DatabaseMessage.ERROR_SELECTING_FINISHED_EVENTS_AND_ASSISTANCES_USER,
                 HttpStatusCode.INTERNAL_SERVER_ERROR,
                 stacktrace
               )
@@ -812,7 +812,68 @@ router.get('/:user_id/assistances/active', authenticateJWT, parseUserId, async (
 
             next(
               new ErrorAPI(
-                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                DatabaseMessage.ERROR_SELECTING_ACTIVE_EVENTS_AND_ASSISTANCES_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all friends of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/friends"
+ */
+router.get('/:user_id/friends', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getUserFriends(userId)
+          .then((friends) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(friends)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_USER_FRIENDS,
                 HttpStatusCode.INTERNAL_SERVER_ERROR,
                 stacktrace
               )

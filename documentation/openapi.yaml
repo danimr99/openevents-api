@@ -156,10 +156,38 @@ paths:
               content:
                 application/json:
                   schema:
-                    $ref: '#/components/schemas/ResponseUserWithId'  
+                    $ref: '#/components/schemas/ResponseUserWithId'
           "400":
+            description: Invalid user ID.
+          "404":
             description: User does not exist or was not found.
-            
+
+  /users/{user_id}/friends:
+      get:
+        tags:
+          - Users
+        summary: Gets all friends of a user.
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the user
+        responses:
+          "200":
+              description: List of friends of the user matching ID.
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/ResponseListUserWithId'  
+          "400":
+            description: Invalid user ID.
+          "404":
+            description: User does not exist or was not found.
+
   /users/{user_id}/events:
     get:
       tags:

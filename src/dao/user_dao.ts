@@ -2,6 +2,7 @@ import { PublicUser, User, UserWithId } from '../models/user/user'
 
 import { databaseConnection } from '../utils/database'
 import { encryptPassword } from '../utils/cypher'
+import { FriendshipStatus } from '../models/friendship/friendship_status'
 
 export class UserDAO {
   /**
@@ -131,6 +132,29 @@ export class UserDAO {
         'DELETE FROM users WHERE id = ?',
         [id]
       )
+    )
+  }
+
+  /**
+   * Function to get all friends of a {@link User} from the database.
+   * @param {number} userId - ID of the user.
+   * @returns {Promise<PublicUser[]>} List of friends of the specified user.
+   */
+  async getUserFriends (userId: number): Promise<PublicUser[]> {
+    let result: PublicUser[]
+
+    return await Promise<PublicUser[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT u.id, u.name, u.last_name, u.email, u.image_url FROM users AS u ' +
+        'WHERE u.id = (SELECT user_id FROM friendships AS f WHERE f.friend_user_id = ? AND f.status = ?) ' +
+        'OR u.id = (SELECT friend_user_id FROM friendships AS f2 WHERE f2.user_id = ? AND f2.status = ?)',
+        [userId, FriendshipStatus.ACCEPTED, userId, FriendshipStatus.ACCEPTED]
+      ).then(([rows]) => {
+        // Convert from database result object to user
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
     )
   }
 }
