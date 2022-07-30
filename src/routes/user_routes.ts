@@ -14,8 +14,9 @@ import {
   getUsersByTextSearch, updateUserInformation
 } from '../controllers/user_controller'
 import {
-  getActiveEventsByOwnerId, getEventsAttendedByUserId, getEventsByOwnerId, getFinishedEventsByOwnerId,
-  getFutureEventsByOwnerId
+  getActiveEventsAttendedByUserId, getActiveEventsByOwnerId, getEventsAttendedByUserId,
+  getEventsByOwnerId, getFinishedEventsAttendedByUserId, getFinishedEventsByOwnerId,
+  getFutureEventsAttendedByUserId, getFutureEventsByOwnerId
 } from '../controllers/event_controller'
 
 import { checkPassword } from '../utils/cypher'
@@ -621,6 +622,189 @@ router.get('/:user_id/assistances', authenticateJWT, parseUserId, async (_req: R
         await getEventsAttendedByUserId(userId)
           .then((assistances) => {
           // Send response
+            res.status(HttpStatusCode.OK).json(assistances)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all future events with an assistance of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/assistances/future"
+ */
+router.get('/:user_id/assistances/future', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getFutureEventsAttendedByUserId(userId)
+          .then((assistances) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(assistances)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all finished events with an assistance of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/assistances/finished"
+ */
+router.get('/:user_id/assistances/finished', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getFinishedEventsAttendedByUserId(userId)
+          .then((assistances) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(assistances)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all active events with an assistance of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/assistances/active"
+ */
+router.get('/:user_id/assistances/active', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getActiveEventsAttendedByUserId(userId)
+          .then((assistances) => {
+            // Send response
             res.status(HttpStatusCode.OK).json(assistances)
           }).catch((error) => {
             // Add thrown error to stacktrace

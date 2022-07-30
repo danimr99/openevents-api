@@ -291,6 +291,87 @@ paths:
         "404":
           description: User does not exist or was not found.
 
+  /users/{user_id}/assistances/future:
+    get:
+      tags:
+        - Users
+      summary: Gets all future events with an assistance of a user with matching ID.
+      description: Gets all future events where a user is an attendant along with the comments and ratings given to them by the user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: List of future events where a user is an attendant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.
+
+  /users/{user_id}/assistances/finished:
+    get:
+      tags:
+        - Users
+      summary: Gets all finished events with an assistance of a user with matching ID.
+      description: Gets all finished events where a user is an attendant along with the comments and ratings given to them by the user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: List of finished events where a user is an attendant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.
+
+  /users/{user_id}/assistances/active:
+      get:
+        tags:
+          - Users
+        summary: Gets all active events with an assistance of a user with matching ID.
+        description: Gets all active events where a user is an attendant along with the comments and ratings given to them by the user.
+        security:
+          - BearerAuth: []
+        parameters:
+          - in: path
+            name: user_id
+            schema:
+              type: integer
+            required: true
+            description: ID of the user
+        responses:
+          "200":
+            description: List of active events where a user is an attendant.
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
+          "400":
+            description: Invalid user ID.
+          "404":
+            description: User does not exist or was not found.
+
   /users/search:
     get:
       tags:

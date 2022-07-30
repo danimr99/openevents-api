@@ -222,3 +222,30 @@ export const getActiveEventsByOwnerId = async (ownerId: number): Promise<EventWi
 export const getEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
   return await eventDAO.getEventsAttendedByUserId(userId).then((events) => events)
 }
+
+/**
+ * Function to get all future events where a user is attending along with the comment and rating given to them.
+ * @param userId - ID of the user.
+ * @returns {Promise<object[]>} List of future events with the comment and rating a user is attending to.
+ */
+export const getFutureEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
+  return await eventDAO.getFutureEventsAttendedByUserId(userId).then((events) => events)
+}
+
+/**
+ * Function to get all finished events where a user is attending along with the comment and rating given to them.
+ * @param userId - ID of the user.
+ * @returns {Promise<object[]>} List of finished events with the comment and rating a user is attending to.
+ */
+export const getFinishedEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
+  return await eventDAO.getFinishedEventsAttendedByUserId(userId).then((events) => events)
+}
+
+/**
+ * Function to get all active events where a user is attending along with the comment and rating given to them.
+ * @param userId - ID of the user.
+ * @returns {Promise<object[]>} List of active events with the comment and rating a user is attending to.
+ */
+export const getActiveEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
+  return await eventDAO.getActiveEventsAttendedByUserId(userId).then((events) => events)
+}

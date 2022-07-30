@@ -243,7 +243,7 @@ export class EventDAO {
     return await Promise<EventWithId[]>.resolve(
       // Query to database
       databaseConnection.promise().query(
-        'SELECT * FROM events WHERE owner_id = ? AND start_date < NOW()',
+        'SELECT * FROM events WHERE owner_id = ? AND end_date < NOW()',
         [ownerId]
       ).then(([rows]) => {
         // Convert from database result object to event
@@ -289,6 +289,75 @@ export class EventDAO {
       databaseConnection.promise().query(
         'SELECT e.*, a.rating, a.comment FROM events AS e INNER JOIN assistances AS a ON e.id = a.event_id ' +
         'WHERE a.user_id = ?',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to get all future events where a user is attending along with the comment and rating given to them
+   * from the database.
+   * @param userId - ID of the user.
+   * @returns {Promise<object[]>} List of future events with the comment and rating a user is attending to.
+   */
+  async getFutureEventsAttendedByUserId (userId: number): Promise<object[]> {
+    let result: object[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT e.*, a.rating, a.comment FROM events AS e INNER JOIN assistances AS a ON e.id = a.event_id ' +
+        'WHERE a.user_id = ? AND e.start_date > NOW()',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to get all finished events where a user is attending along with the comment and rating given to them
+   * from the database.
+   * @param userId - ID of the user.
+   * @returns {Promise<object[]>} List of finished events with the comment and rating a user is attending to.
+   */
+  async getFinishedEventsAttendedByUserId (userId: number): Promise<object[]> {
+    let result: object[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT e.*, a.rating, a.comment FROM events AS e INNER JOIN assistances AS a ON e.id = a.event_id ' +
+        'WHERE a.user_id = ? AND e.end_date < NOW()',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
+
+  /**
+   * Function to get all active events where a user is attending along with the comment and rating given to them
+   * from the database.
+   * @param userId - ID of the user.
+   * @returns {Promise<object[]>} List of active events with the comment and rating a user is attending to.
+   */
+  async getActiveEventsAttendedByUserId (userId: number): Promise<object[]> {
+    let result: object[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT e.*, a.rating, a.comment FROM events AS e INNER JOIN assistances AS a ON e.id = a.event_id ' +
+        'WHERE a.user_id = ? AND e.start_date < NOW() AND e.end_date > NOW()',
         [userId]
       ).then(([rows]) => {
         // Convert from database result object to event
