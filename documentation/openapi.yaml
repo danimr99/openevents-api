@@ -584,7 +584,7 @@ paths:
     get:
       tags:
         - Events
-      summary: Gets an event by ID.
+      summary: Gets all assistances of an event.
       security:
         - BearerAuth: []
       parameters:
@@ -605,6 +605,38 @@ paths:
           description: Invalid event ID.
         "404":
           description: Event does not exist or was not found.
+
+  /events/{event_id}/assistances/{user_id}:
+    get:
+      tags:
+        - Events
+      summary: Gets the assistance of a user for an event.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: Assistance of a user for an event.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAssistance'
+        "400":
+          description: Invalid event or user ID.
+        "404":
+          description: Event or user does not exist or was not found.
 
   /messages:
     post:
@@ -1135,6 +1167,21 @@ components:
           timestamp:
             type: string
             example: "2022-07-24T12:18:11.470Z"
+    ResponseAssistance:
+      type: object
+      properties:
+        user_id:
+          type: number
+          example: 1
+        event_id:
+          type: number
+          example: 18
+        rating:
+          type: number
+          example: 8
+        comment:
+          type: string
+          example: "Good music!"
     ResponseListAssistance:
       type: array
       items:

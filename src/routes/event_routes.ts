@@ -6,7 +6,7 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventId, parseEventSearch, parsePartialEvent } from '../middlewares/parser'
+import { parseAllEvent, parseEventId, parseEventSearch, parsePartialEvent, parseUserId } from '../middlewares/parser'
 
 import {
   createEvent, deleteEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
@@ -14,7 +14,8 @@ import {
 } from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
-import { getEventAssistances } from '../controllers/assistance_controller'
+import { getEventAssistances, getUserAssistanceForEvent } from '../controllers/assistance_controller'
+import { existsUserById } from '../controllers/user_controller'
 
 // Create a router for events
 const router = express.Router()
@@ -409,5 +410,86 @@ router.get('/:event_id/assistances', authenticateJWT, parseEventId, async (_req:
       )
     })
 })
+
+/**
+ * Route that gets an assistance of user with matching ID for event with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/events/{event_id}/assistances/{user_id}"
+ */
+router.get('/:event_id/assistances/:user_id', authenticateJWT, parseEventId, parseUserId,
+  async (_req: Request, res: Response, next: NextFunction) => {
+    // Get event ID from the URL path sent as parameter
+    const eventId = res.locals.PARSED_EVENT_ID
+
+    // Get user ID from the URL path sent as parameter
+    const userId = res.locals.PARSED_USER_ID
+
+    // Create stacktrace
+    const stacktrace: any = {
+      _original: {
+        user_id: userId,
+        event_id: eventId
+      }
+    }
+
+    // Check if user exists
+    await existsUserById(userId)
+      .then(async (existsUser) => {
+        if (existsUser) {
+          // User exists
+          await existsEventById(eventId)
+            .then(async (existsEvent) => {
+              if (existsEvent) {
+                // Event exists
+                await getUserAssistanceForEvent(userId, eventId)
+                  .then((assistances) => {
+                    // Send response
+                    res.status(HttpStatusCode.OK).json(assistances)
+                  })
+              } else {
+                // Event does not exist
+                next(
+                  new ErrorAPI(
+                    APIMessage.EVENT_NOT_FOUND,
+                    HttpStatusCode.NOT_FOUND,
+                    stacktrace
+                  )
+                )
+              }
+            }).catch((error) => {
+              // Add thrown error to stacktrace
+              stacktrace.error_sql = formatErrorSQL(error)
+
+              next(
+                new ErrorAPI(
+                  DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+                  HttpStatusCode.INTERNAL_SERVER_ERROR,
+                  stacktrace
+                )
+              )
+            })
+        } else {
+          // User does not exist
+          next(
+            new ErrorAPI(
+              APIMessage.USER_NOT_FOUND,
+              HttpStatusCode.NOT_FOUND,
+              stacktrace
+            )
+          )
+        }
+      }).catch((error) => {
+        // Add thrown error to stacktrace
+        stacktrace.error_sql = formatErrorSQL(error)
+
+        next(
+          new ErrorAPI(
+            DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+            HttpStatusCode.INTERNAL_SERVER_ERROR,
+            stacktrace
+          )
+        )
+      })
+  })
 
 export default router
