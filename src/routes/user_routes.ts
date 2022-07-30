@@ -14,8 +14,8 @@ import {
   getUsersByTextSearch, updateUserInformation
 } from '../controllers/user_controller'
 import {
-  getActiveEventsByOwner, getEventsByOwner, getFinishedEventsByOwner,
-  getFutureEventsByOwner
+  getActiveEventsByOwnerId, getEventsAttendedByUserId, getEventsByOwnerId, getFinishedEventsByOwnerId,
+  getFutureEventsByOwnerId
 } from '../controllers/event_controller'
 
 import { checkPassword } from '../utils/cypher'
@@ -374,10 +374,21 @@ router.get('/:user_id/events', authenticateJWT, parseUserId, async (_req: Reques
     .then(async (existsUser) => {
       if (existsUser) {
         // User exists
-        await getEventsByOwner(userId)
+        await getEventsByOwnerId(userId)
           .then((events) => {
           // Send response
             res.status(HttpStatusCode.OK).json(events)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENTS_CREATED_BY_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
           })
       } else {
         // User does not exist
@@ -424,10 +435,21 @@ router.get('/:user_id/events/future', authenticateJWT, parseUserId, async (_req:
     .then(async (existsUser) => {
       if (existsUser) {
         // User exists
-        await getFutureEventsByOwner(userId)
+        await getFutureEventsByOwnerId(userId)
           .then((events) => {
           // Send response
             res.status(HttpStatusCode.OK).json(events)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_FUTURE_EVENTS_CREATED_BY_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
           })
       } else {
         // User does not exist
@@ -474,10 +496,21 @@ router.get('/:user_id/events/finished', authenticateJWT, parseUserId, async (_re
     .then(async (existsUser) => {
       if (existsUser) {
         // User exists
-        await getFinishedEventsByOwner(userId)
+        await getFinishedEventsByOwnerId(userId)
           .then((events) => {
           // Send response
             res.status(HttpStatusCode.OK).json(events)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_FINISHED_EVENTS_CREATED_BY_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
           })
       } else {
         // User does not exist
@@ -524,10 +557,82 @@ router.get('/:user_id/events/active', authenticateJWT, parseUserId, async (_req:
     .then(async (existsUser) => {
       if (existsUser) {
         // User exists
-        await getActiveEventsByOwner(userId)
+        await getActiveEventsByOwnerId(userId)
           .then((events) => {
           // Send response
             res.status(HttpStatusCode.OK).json(events)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_ACTIVE_EVENTS_CREATED_BY_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets all events with an assistance of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/assistances"
+ */
+router.get('/:user_id/assistances', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+// Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if exists user with matching ID
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getEventsAttendedByUserId(userId)
+          .then((assistances) => {
+          // Send response
+            res.status(HttpStatusCode.OK).json(assistances)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
           })
       } else {
         // User does not exist

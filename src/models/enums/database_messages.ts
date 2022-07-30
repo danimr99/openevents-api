@@ -24,5 +24,10 @@ export enum DatabaseMessage {
   ERROR_UPDATING_FRIEND_REQUEST = 'An error has occurred while accepting a friend request from the database',
   ERROR_DELETING_FRIEND_REQUEST = 'An error has occurred while deleting a friendship or a friend request from the database',
   ERROR_SELECTING_USER_ASSISTANCE_FOR_EVENT = 'An error has occurred while fetching an assistance of a user for an event from the database',
-  ERROR_DELETING_USER_ASSISTANCE_FOR_EVENT = 'An error has occurred while deleting an assistance of a user for an event from the database'
+  ERROR_DELETING_USER_ASSISTANCE_FOR_EVENT = 'An error has occurred while deleting an assistance of a user for an event from the database',
+  ERROR_SELECTING_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all events created by a user from the database',
+  ERROR_SELECTING_FUTURE_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all future events created by a user from the database',
+  ERROR_SELECTING_FINISHED_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all finished events created by a user from the database',
+  ERROR_SELECTING_ACTIVE_EVENTS_CREATED_BY_USER = 'An error has occurred while fetching all active events created by a user from the database',
+  ERROR_SELECTING_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all events attended by a user along with the comment and rating given from the database'
 }

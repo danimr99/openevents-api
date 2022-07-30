@@ -274,4 +274,27 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to get all events where a user is attending along with the comment and rating given to them
+   * from the database.
+   * @param userId - ID of the user.
+   * @returns {Promise<object[]>} List of events with the comment and rating a user is attending to.
+   */
+  async getEventsAttendedByUserId (userId: number): Promise<object[]> {
+    let result: object[]
+
+    return await Promise<EventWithId[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT e.*, a.rating, a.comment FROM events AS e INNER JOIN assistances AS a ON e.id = a.event_id ' +
+        'WHERE a.user_id = ?',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to event
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }

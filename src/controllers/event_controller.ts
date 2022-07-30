@@ -183,7 +183,7 @@ export const deleteEvent = async (eventId: number): Promise<void> => {
  * @param ownerId - ID of the owner of the event.
  * @returns {Promise<EventWithId[]>} List of events where the specified user is the owner.
  */
-export const getEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+export const getEventsByOwnerId = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getEventsByOwner(ownerId).then((events) => events)
 }
 
@@ -192,7 +192,7 @@ export const getEventsByOwner = async (ownerId: number): Promise<EventWithId[]> 
  * @param ownerId - ID of the owner of the event.
  * @returns {Promise<EventWithId[]>} List of future events where the specified user is the owner.
  */
-export const getFutureEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+export const getFutureEventsByOwnerId = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getFutureEventsByOwner(ownerId).then((events) => events)
 }
 
@@ -201,7 +201,7 @@ export const getFutureEventsByOwner = async (ownerId: number): Promise<EventWith
  * @param ownerId - ID of the owner of the event.
  * @returns {Promise<EventWithId[]>} List of finished events where the specified user is the owner.
  */
-export const getFinishedEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+export const getFinishedEventsByOwnerId = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getFinishedEventsByOwner(ownerId).then((events) => events)
 }
 
@@ -210,6 +210,15 @@ export const getFinishedEventsByOwner = async (ownerId: number): Promise<EventWi
  * @param ownerId - ID of the owner of the event.
  * @returns {Promise<EventWithId[]>} List of active events where the specified user is the owner.
  */
-export const getActiveEventsByOwner = async (ownerId: number): Promise<EventWithId[]> => {
+export const getActiveEventsByOwnerId = async (ownerId: number): Promise<EventWithId[]> => {
   return await eventDAO.getActiveEventsByOwner(ownerId).then((events) => events)
+}
+
+/**
+ * Function to get all events where a user is attending along with the comment and rating given to them.
+ * @param userId - ID of the user.
+ * @returns {Promise<object[]>} List of events with the comment and rating a user is attending to.
+ */
+export const getEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
+  return await eventDAO.getEventsAttendedByUserId(userId).then((events) => events)
 }

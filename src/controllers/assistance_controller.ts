@@ -14,6 +14,13 @@ export const getUserAssistanceForEvent = async (userId: number, eventId: number)
   return await assistanceDAO.getUserAssistanceForEvent(userId, eventId).then((assistances) => assistances)
 }
 
+/**
+ * Function to check if exists an {@link Assistance} of a {@link User} for an {@link Event}.
+ * @param userId - ID of the user.
+ * @param eventId - ID of the event.
+ * @returns {Promise<Boolean>} True if exists an assistance of the specified user for the specified event,
+ * false otherwise.
+ */
 export const existsAssistance = async (userId: number, eventId: number): Promise<boolean> => {
   return await getUserAssistanceForEvent(userId, eventId)
     .then((assistances) => {
