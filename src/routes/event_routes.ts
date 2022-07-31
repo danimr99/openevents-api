@@ -11,6 +11,7 @@ import { parseAllEvent, parseEventId, parseEventSearch, parsePartialAssistance, 
 
 import {
   createEvent, deleteEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
+  getFuturePopularEvents,
   hasEventFinished,
   isUserEventOwner, updateEventInformation
 } from '../controllers/event_controller'
@@ -31,7 +32,7 @@ const router = express.Router()
  * Endpoint: "/events"
  */
 router.get('/', authenticateJWT, async (_req: Request, res: Response, next: NextFunction) => {
-// Get all future events from database
+  // Get all future events from database
   await getAllEvents()
     .then((events) => {
       res.status(HttpStatusCode.OK).json(events)
@@ -88,7 +89,34 @@ router.post('/', authenticateJWT, parseAllEvent, async (_req: Request, res: Resp
  * Route that searches events with a title or location
  * matching the value of the query parameter.
  * HTTP Method: GET
- * Endpoint: "/users/search"
+ * Endpoint: "/events/popular"
+ */
+router.get('/popular', authenticateJWT, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get all future popular events
+  await getFuturePopularEvents()
+    .then((events) => {
+      res.status(HttpStatusCode.OK).json(events)
+    }).catch((error) => {
+      // Create stacktrace
+      const stacktrace: any = {
+        error_sql: formatErrorSQL(error)
+      }
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_SELECTING_ALL_EVENTS,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that searches events with a title or location
+ * matching the value of the query parameter.
+ * HTTP Method: GET
+ * Endpoint: "/events/search"
  */
 router.get('/search', authenticateJWT, parseEventSearch, async (_req: Request, res: Response, next: NextFunction) => {
   // Get validated event title and location to search

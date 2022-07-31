@@ -389,4 +389,44 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to get all future popular events from the database.
+   * @returns {Promise<EventWithId[]>} List of popular future events.
+   */
+  async getFuturePopularEvents (): Promise<EventWithId[]> {
+    const popularEvents: EventWithId[] = []
+
+    // Get average score for each event owner
+    const ownersAverageScores: object[] = await databaseConnection.promise().query(
+      'SELECT (AVG(a.rating)) AS average_score, e.owner_id FROM assistances AS a, events AS e, users AS u ' +
+      'WHERE e.owner_id = u.id AND e.id = a.event_id AND e.end_date < NOW() GROUP BY e.owner_id ' +
+      'ORDER BY average_score DESC'
+    ).then(([rows]) => {
+      // Convert from database result object to list of scores
+      return JSON.parse(JSON.stringify(rows))
+    })
+
+    // Get all future events
+    const futureEvents: EventWithId[] = await databaseConnection.promise().query(
+      'SELECT * FROM events WHERE start_date > NOW()'
+    ).then(([rows]) => {
+      // Convert from database result object to event
+      return JSON.parse(JSON.stringify(rows))
+    })
+
+    // Iterate through all future events
+    futureEvents.forEach(event => {
+      // Iterate through all owners average scores
+      ownersAverageScores.forEach((owner: any) => {
+        // If the owner has the highest average score
+        if (event.owner_id === owner.owner_id) {
+          // Add event to popular events list
+          popularEvents.push(event)
+        }
+      })
+    })
+
+    return popularEvents
+  }
 }

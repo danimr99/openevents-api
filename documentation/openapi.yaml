@@ -489,6 +489,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/ResponseEventWithId'
 
+  /events/popular:
+    get:
+      tags:
+        - Events
+      summary: Gets all future popular events.
+      description: Gets all the events whose start date is greater than now ordered by the average user rating in DESC order. It will only show events of those
+        owners that have received a rating on finished events.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of future popular events.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithId'
+
   /events/search:
     get:
       tags:

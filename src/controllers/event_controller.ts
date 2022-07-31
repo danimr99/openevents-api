@@ -284,3 +284,11 @@ export const hasEventFinished = async (eventId: number): Promise<boolean> => {
 export const getAverageRatingOfEventsCreatedByUser = async (userId: number): Promise<number> => {
   return await eventDAO.getAverageRatingOfEventsCreatedByUser(userId)
 }
+
+/**
+ * Function to get all future popular events from the database.
+ * @returns {Promise<EventWithId[]>} List of popular future events.
+ */
+export const getFuturePopularEvents = async (): Promise<EventWithId[]> => {
+  return await eventDAO.getFuturePopularEvents()
+}
