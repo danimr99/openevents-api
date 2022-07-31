@@ -26,7 +26,7 @@ export class AssistanceDAO {
    * @param {number} eventId - ID of an event.
    */
   async deleteUserAssistanceForEvent (userId: number, eventId: number): Promise<void> {
-    // Delete event with the specified ID from the database
+    // Delete event with the specified ID
     await databaseConnection.promise().query(
       'DELETE FROM assistances WHERE user_id = ? AND event_id = ?',
       [userId, eventId]
@@ -88,5 +88,17 @@ export class AssistanceDAO {
       // Convert from database result object to list of assistances
       return JSON.parse(JSON.stringify(rows)) as Assistance[]
     })
+  }
+
+  /**
+   * Function to delete all assistances of an event from the database.
+   * @param eventId - ID of an event.
+   */
+  async deleteAssistancesOfEvent (eventId: number): Promise<void> {
+    // Delete assistances of an event
+    await databaseConnection.promise().query(
+      'DELETE FROM assistances WHERE event_id = ?',
+      [eventId]
+    )
   }
 }

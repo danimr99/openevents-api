@@ -4,6 +4,7 @@ import { EventDAO } from '../dao/event_dao'
 
 import { isNumber, isObject, validateEvent, validateString } from '../utils/validator'
 import { getCurrentDate, toDate } from '../utils/dates'
+import { deleteAssistancesOfEvent } from './assistance_controller'
 
 const eventDAO = new EventDAO()
 
@@ -170,7 +171,11 @@ export const isUserEventOwner = async (userId: number, eventId: number): Promise
  * @param {number} eventId - ID of an event to delete.
  */
 export const deleteEvent = async (eventId: number): Promise<void> => {
+  // Delete event
   await eventDAO.deleteEventById(eventId)
+
+  // Delete event assistances
+  await deleteAssistancesOfEvent(eventId)
 }
 
 /**
