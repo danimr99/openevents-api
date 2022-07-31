@@ -1,18 +1,19 @@
 import { Request, Response, NextFunction } from 'express'
 
-import { getMinimumPasswordLength } from '../constants'
+import { getMaximumEventRatingValue, getMinimumEventRatingValue, getMinimumPasswordLength } from '../constants'
 
 import { User, UserCredentials } from '../models/user/user'
 import { Event } from '../models/event/event'
 import { EventFormat } from '../models/event/event_format'
 import { EventCategory } from '../models/event/event_category'
 import { Message } from '../models/message/message'
+import { Assistance } from '../models/assistance/assistance'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
 import { APIMessage } from '../models/enums/api_messages'
 
 import {
-  isNumber, isObject, validateCredentials, validateEvent,
+  isNumber, isObject, validateAssistance, validateCredentials, validateEvent,
   validateEventSearch, validateMessage, validateUser
 } from '../utils/validator'
 import { getCurrentDate } from '../utils/dates'
@@ -460,7 +461,7 @@ export const parseEventSearch = (req: Request, res: Response, next: NextFunction
  * @param {NextFunction} next - Next middleware.
  */
 export const parseAllMessage = (req: Request, res: Response, next: NextFunction): void => {
-  // Set all user fields as required
+  // Set all message fields as required
   res.locals.optionalMessageFields = false
 
   return parseMessage(req, res, next)
@@ -474,7 +475,7 @@ export const parseAllMessage = (req: Request, res: Response, next: NextFunction)
  * @param {NextFunction} next - Next middleware.
  */
 export const parsePartialMessage = (req: Request, res: Response, next: NextFunction): void => {
-  // Set all user fields as optional
+  // Set all message fields as optional
   res.locals.optionalMessageFields = true
 
   return parseMessage(req, res, next)
@@ -553,6 +554,113 @@ const parseMessage = (req: Request, res: Response, next: NextFunction): void => 
   } else {
     // Pass validated message to the next middleware
     res.locals.PARSED_MESSAGE = message
+    next()
+  }
+}
+
+/**
+ * Middleware to parse all information fields of an {@link Assistance}.
+ * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parseAllAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all assistance fields as required
+  res.locals.optionalAssistanceFields = false
+
+  return parseAssistance(req, res, next)
+}
+
+/**
+ * Middleware to parse optional information fields of an {@link Assistance}.
+ * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const parsePartialAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all user fields as optional
+  res.locals.optionalAssistanceFields = true
+
+  return parseAssistance(req, res, next)
+}
+
+/**
+ * Middleware to get and validate all the information required for an {@link Assistance}
+ * from the request body in JSON format. If any assistance field validation is unsuccessful,
+ * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
+ * to determine whether fields of an {@link Assistance} are optional or required.
+ * @see res.locals.optionalAssistanceFields
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+const parseAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Get the ID of the authenticated user
+  const authenticatedUserId = res.locals.JWT_USER_ID
+
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Create a stacktrace
+  let stacktrace: any = {}
+
+  // Check if request body is not a JSON object
+  if (!isObject(req.body)) {
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_REQUEST_BODY_FORMAT,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  }
+
+  // Get all assistance data from request body
+  const assistance: Assistance = {
+    user_id: authenticatedUserId,
+    event_id: eventId,
+    comment: req.body.comment,
+    rating: req.body.rating
+  }
+
+  // Add received message data to stacktrace
+  stacktrace = {
+    _original: assistance
+  }
+
+  // Validate assistance data
+  const invalidFields: string[] = validateAssistance(assistance, res.locals.optionalAssistanceFields)
+
+  // Check if exists invalid fields
+  if (invalidFields.length > 0) {
+    // Add each invalid assistance field to stacktrace
+    stacktrace.invalid_fields = invalidFields.map(field => {
+      let message
+
+      switch (field) {
+        case 'comment':
+          message = APIMessage.ERROR_INVALID_STRING_FIELD
+          break
+        case 'rating':
+          message = `${APIMessage.ERROR_INVALID_EVENT_RATING_I} ${getMinimumEventRatingValue()} ${APIMessage.ERROR_INVALID_EVENT_RATING_II} ${getMaximumEventRatingValue()}`
+          break
+      }
+
+      return { field, message }
+    })
+
+    next(
+      new ErrorAPI(
+        APIMessage.ERROR_INVALID_ASSISTANCE_FIELDS,
+        HttpStatusCode.BAD_REQUEST,
+        stacktrace
+      )
+    )
+  } else {
+    // Pass validated message to the next middleware
+    res.locals.PARSED_ASSISTANCE = assistance
     next()
   }
 }

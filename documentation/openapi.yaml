@@ -645,6 +645,40 @@ paths:
           description: Invalid event ID.
         "404":
           description: Event does not exist or was not found.
+    put:
+      tags:
+        - Events
+      summary: Edits an assistance of the authenticated user for the event with matching ID.
+      description: An event can only be rated and commented when it has finished.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
+      requestBody:
+        description: Assistance information in JSON format. Only the fields to be updated are required.
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/RequestAssistance'
+      responses:
+        "200":
+          description: Assistance edited.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAssistance'
+        "400":
+          description: Invalid event ID.
+        "403":
+          description: Event cannot neither be commented or rated because it has not finished yet.
+        "404":
+          description: Event or assistance does not exist or was not found.
 
   /events/{event_id}/assistances/{user_id}:
     get:
@@ -1047,37 +1081,48 @@ components:
           title:
             type: string
             example: "Drawing 101: Portraits"
+            description: Title of the event
           image_url:
             type: string
             example: "https://i.imgur.com/JprpLyc.jpg"
+            description: URL of the image of the event.
           format:
             type: number
             example: 1
+            description: Whether the event is online or not. (0 = Face-to-face / 1 = Online)
           link:
             type: string
             example: "https://www.zoom.com/"
+            description: Link to a conference, stream, etc. Optional if the event is face-to-face.
           location:
             type: string
             example: "Barcelona"
+            description: Location of the event
           description:
             type: string
             example: "Learn the basics of portrait drawing with a professional artist 
               with +10 years of experience"
+            description: Description of the event
           start_date:
             type: string
             example: "2022-07-23 10:00"
+            description: Start date of the event. Must be before the end date.
           end_date:
             type: string
             example: "2022-07-25 10:00"
+            description: End date of the event
           max_attendees:
             type: number
             example: 120
+            description: Max number of face-to-face attendees of the event. Optional if event is online. 
           ticket_price:
             type: number
             example: 4.99
+            description: Ticket price of the event.
           category: 
             type: string
             example: 'Art'
+            description: Category of the event.
     ResponseEventWithId:
       type: object
       properties:
@@ -1207,6 +1252,17 @@ components:
           timestamp:
             type: string
             example: "2022-07-24T12:18:11.470Z"
+    RequestAssistance:
+      type: object
+      properties:
+        comment:
+          type: string
+          example: "Good music!"
+          description: Comment about the event.
+        rating:
+          type: number
+          example: 5
+          description: Rating given to the event.
     ResponseAssistance:
       type: object
       properties:
@@ -1218,7 +1274,7 @@ components:
           example: 18
         rating:
           type: number
-          example: 8
+          example: 4
         comment:
           type: string
           example: "Good music!"
@@ -1235,7 +1291,7 @@ components:
             example: 18
           rating:
             type: number
-            example: 8
+            example: 4
           comment:
             type: string
             example: "Good music!"
@@ -1289,7 +1345,7 @@ components:
             example: 'Art'
           rating:
             type: number
-            example: 9
+            example: 5
           comment:
             type: string
             example: 'Awesome experience!'

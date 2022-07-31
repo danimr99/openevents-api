@@ -40,5 +40,9 @@ export enum APIMessage {
   ASSISTANCE_DELETED = 'Assistance has been deleted',
   ASSISTANCE_NOT_FOUND = 'Assistance does not exist or was not found',
   ASSISTANCE_CREATED = 'Assistance has been created',
-  ASSISTANCE_ALREADY_EXISTS = 'User has already joined the event'
+  ASSISTANCE_ALREADY_EXISTS = 'User has already joined the event',
+  ERROR_INVALID_EVENT_RATING_I = 'Must be a number between',
+  ERROR_INVALID_EVENT_RATING_II = 'and',
+  ERROR_INVALID_ASSISTANCE_FIELDS = 'All assistance information must be properly fulfilled',
+  EVENT_NOT_FINISHED = 'Event cannot be neither commented or rated because it has not finished yet'
 }

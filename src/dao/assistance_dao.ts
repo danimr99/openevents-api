@@ -78,4 +78,18 @@ export class AssistanceDAO {
       )
     )
   }
+
+  /**
+   * Function to update an {@link Assistance} from the database.
+   * @param {Assistance} assistance - Assistance to update.
+   */
+  async updateAssistance (assistance: Assistance): Promise<any> {
+    return await Promise<any>.resolve(
+      // Update assistance on the database
+      databaseConnection.promise().query(
+        'UPDATE assistances SET comment = ?, rating = ? WHERE user_id = ? AND event_id = ?',
+        [assistance.comment, assistance.rating, assistance.user_id, assistance.event_id]
+      )
+    )
+  }
 }

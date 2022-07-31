@@ -1,21 +1,26 @@
 import express, { Request, Response, NextFunction } from 'express'
 
+import { Assistance } from '../models/assistance/assistance'
 import { ErrorAPI } from '../models/error/error_api'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventId, parseEventSearch, parsePartialEvent, parseUserId } from '../middlewares/parser'
+import { parseAllEvent, parseEventId, parseEventSearch, parsePartialAssistance, parsePartialEvent, parseUserId } from '../middlewares/parser'
 
 import {
   createEvent, deleteEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
+  hasEventFinished,
   isUserEventOwner, updateEventInformation
 } from '../controllers/event_controller'
+import {
+  createUserAssistanceForEvent, existsAssistance, getEventAssistances, getUserAssistanceForEvent,
+  updateAssistance
+} from '../controllers/assistance_controller'
+import { existsUserById } from '../controllers/user_controller'
 
 import { formatErrorSQL } from '../utils/database'
-import { createUserAssistanceForEvent, getEventAssistances, getUserAssistanceForEvent } from '../controllers/assistance_controller'
-import { existsUserById } from '../controllers/user_controller'
 
 // Create a router for events
 const router = express.Router()
@@ -452,12 +457,115 @@ router.post('/:event_id/assistances', authenticateJWT, parseEventId, async (_req
             })
           })
           .catch((error) => {
-          // Add thrown error to stacktrace
+            // Add thrown error to stacktrace
             stacktrace.error_sql = formatErrorSQL(error)
 
             next(
               new ErrorAPI(
                 DatabaseMessage.ERROR_INSERTING_ASSISTANCE,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // Event does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.EVENT_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that edits an assistance of the authenticated user for the event with matching ID.
+ * HTTP Method: PUT
+ * Endpoint: "/events/{event_id}/assistances"
+ */
+router.put('/:event_id/assistances', authenticateJWT, parseEventId, parsePartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get assistance from request body
+  const assistance: Assistance = res.locals.PARSED_ASSISTANCE
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      assistance
+    }
+  }
+
+  // Check if exists event
+  await existsEventById(assistance.event_id)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+      // Event exists
+        await existsAssistance(assistance.user_id, assistance.event_id)
+          .then(async (existsAssistance) => {
+            if (existsAssistance) {
+              // Assistance exists
+              await hasEventFinished(assistance.event_id)
+                .then(async (hasFinished) => {
+                  if (hasFinished) {
+                    // Event has finished
+                    await updateAssistance(assistance)
+                      .then((assistance) => {
+                        // Send response
+                        res.status(HttpStatusCode.OK).json(assistance)
+                      })
+                      .catch((error) => {
+                        // Add thrown error to stacktrace
+                        stacktrace.error_sql = formatErrorSQL(error)
+
+                        next(
+                          new ErrorAPI(
+                            DatabaseMessage.ERROR_UPDATING_ASSISTANCE,
+                            HttpStatusCode.INTERNAL_SERVER_ERROR,
+                            stacktrace
+                          )
+                        )
+                      })
+                  } else {
+                    // Event has not finished yet
+                    next(
+                      new ErrorAPI(
+                        APIMessage.EVENT_NOT_FINISHED,
+                        HttpStatusCode.FORBIDDEN,
+                        stacktrace
+                      )
+                    )
+                  }
+                })
+            } else {
+              // Assistance does not exist
+              next(
+                new ErrorAPI(
+                  APIMessage.ASSISTANCE_NOT_FOUND,
+                  HttpStatusCode.NOT_FOUND,
+                  stacktrace
+                )
+              )
+            }
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_CHECKING_ASSISTANCE,
                 HttpStatusCode.INTERNAL_SERVER_ERROR,
                 stacktrace
               )

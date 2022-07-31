@@ -1,7 +1,9 @@
 import { Assistance } from '../models/assistance/assistance'
+import { APIMessage } from '../models/enums/api_messages'
 
 import { AssistanceDAO } from '../dao/assistance_dao'
-import { APIMessage } from '../models/enums/api_messages'
+
+import { validateAssistance } from '../utils/validator'
 
 const assistanceDAO = new AssistanceDAO()
 
@@ -73,4 +75,39 @@ export const createUserAssistanceForEvent = async (userId: number, eventId: numb
         return APIMessage.ASSISTANCE_ALREADY_EXISTS
       }
     })
+}
+
+/**
+ * Function to update the information of an {@link Assistance}.
+ * @param {Assistance} assistance
+ * @returns {Promise<Assistance>} Assistance with the updated information.
+ */
+export const updateAssistance = async (assistance: Assistance): Promise<Assistance> => {
+  // Get assistance with the existing information
+  const existingAssistance = await getUserAssistanceForEvent(assistance.user_id, assistance.event_id)
+    .then((assistances) => {
+      return assistances[0]
+    })
+
+  // Get the assistance fields that are not marked as updatable
+  const notUpdatableFields = validateAssistance(assistance, false)
+
+  // Set new values for the updated assistance
+  const updatedAssistance: Assistance = assistance
+
+  // Set old values to those fields that are not marked as updatable
+  notUpdatableFields.forEach((field) => {
+    switch (field) {
+      case 'comment':
+        updatedAssistance.comment = (existingAssistance).comment
+        break
+      case 'rating':
+        updatedAssistance.rating = (existingAssistance).rating
+        break
+    }
+  })
+
+  await assistanceDAO.updateAssistance(updatedAssistance)
+
+  return updatedAssistance
 }

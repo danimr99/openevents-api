@@ -99,7 +99,7 @@ export const getUsersByTextSearch = async (text: string): Promise<PublicUser[]> 
 }
 
 /**
- * Function to update the information of a {@link User} on the database.
+ * Function to update the information of a {@link User}.
  * @param {number} id - ID of the user to update.
  * @param {User} user - User with the updated information.
  */

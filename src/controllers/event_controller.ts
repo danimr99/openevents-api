@@ -3,7 +3,7 @@ import { Event, EventWithId } from '../models/event/event'
 import { EventDAO } from '../dao/event_dao'
 
 import { isNumber, isObject, validateEvent, validateString } from '../utils/validator'
-import { toDate } from '../utils/dates'
+import { getCurrentDate, toDate } from '../utils/dates'
 
 const eventDAO = new EventDAO()
 
@@ -248,4 +248,29 @@ export const getFinishedEventsAttendedByUserId = async (userId: number): Promise
  */
 export const getActiveEventsAttendedByUserId = async (userId: number): Promise<object[]> => {
   return await eventDAO.getActiveEventsAttendedByUserId(userId).then((events) => events)
+}
+
+/**
+ * Function to check whether an {@link Event} has finished or not.
+ * @param eventId - ID of the event.
+ * @returns {Promise<Boolean>} True if the event has finished, false otherwise.
+ */
+export const hasEventFinished = async (eventId: number): Promise<boolean> => {
+  return await existsEventById(eventId)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+        // Event exists
+        return await getEventsById(eventId)
+          .then((events) => {
+            // Get event
+            const event = events[0]
+
+            // Check if event has finished
+            return toDate(event.end_date) < getCurrentDate()
+          })
+      } else {
+        // Event does not exist
+        return false
+      }
+    })
 }

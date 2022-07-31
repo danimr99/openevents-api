@@ -7,6 +7,7 @@ import { Event, EventKey } from '../models/event/event'
 import { EventCategory } from '../models/event/event_category'
 import { EventFormat } from '../models/event/event_format'
 import { Message, MessageKey } from '../models/message/message'
+import { Assistance, AssistanceKey } from '../models/assistance/assistance'
 
 import { compareDates } from './dates'
 
@@ -99,7 +100,7 @@ export const validateUser = (user: User, areFieldsOptional: boolean): string[] =
 
   // Iterate through each key - value pair
   for (const [key, value] of Object.entries(user)) {
-    // Fill the list of invalid fields if it is not for each value
+    // Fill the list of invalid fields if it is not valid for each value
     switch (key) {
       case 'name':
       case 'last_name':
@@ -140,7 +141,7 @@ export const validateCredentials = (credentials: UserCredentials): string[] => {
 
   // Iterate through each key - value pair
   for (const [key, value] of Object.entries(credentials)) {
-    // Fill the list of invalid fields if it is not for each value
+    // Fill the list of invalid fields if it is not valid for each value
     switch (key) {
       case 'email':
         if (!validateEmail(value)) invalidFields.push(key)
@@ -165,7 +166,7 @@ export const validateEvent = (event: Event, areFieldsOptional: boolean): string[
 
   // Iterate through each key - value pair
   for (const [key, value] of Object.entries(event)) {
-    // Fill the list of invalid fields if it is not for each value
+    // Fill the list of invalid fields if it is not valid for each value
     switch (key) {
       case 'title':
       case 'image_url':
@@ -280,7 +281,7 @@ export const validateEventRating = (rating: any): boolean => {
 
 /**
  * Function that checks if a {@link Message} is valid.
- * @param {Event} message - Message to check.
+ * @param {Message} message - Message to check.
  * @param {Boolean} areFieldsOptional - Flag to indicate whether all message fields are required or not.
  * @returns {string[]} List of invalid message fields. If list is empty, message is valid.
  */
@@ -289,7 +290,7 @@ export const validateMessage = (message: Message, areFieldsOptional: boolean): s
 
   // Iterate through each key - value pair
   for (const [key, value] of Object.entries(message)) {
-    // Fill the list of invalid fields if it is not for each value
+    // Fill the list of invalid fields if it is not valid for each value
     switch (key) {
       case 'receiverUserId':
         if (!isNumber(value)) invalidFields.push(key)
@@ -300,15 +301,52 @@ export const validateMessage = (message: Message, areFieldsOptional: boolean): s
     }
   }
 
-  // Check if event fields are optional
+  // Check if message fields are optional
   if (areFieldsOptional) {
     // Filter invalid fields list to get only those incorrectly fulfilled
     invalidFields = invalidFields.filter((field: string) => {
-      // Set field as an event property
+      // Set field as a message property
       const property = field as MessageKey
 
-      // Check if value of the event property is fulfilled
+      // Check if value of the message property is fulfilled
       return !(message[property] === undefined)
+    })
+  }
+
+  return invalidFields
+}
+
+/**
+ * Function that checks if an {@link Assistance} is valid.
+ * @param {Assistance} assistance - Assistance to check.
+ * @param {Boolean} areFieldsOptional - Flag to indicate whether all assistance fields are required or not.
+ * @returns {string[]} List of invalid assistance fields. If list is empty, assistance is valid.
+ */
+export const validateAssistance = (assistance: Assistance, areFieldsOptional: boolean): string[] => {
+  let invalidFields: string[] = []
+
+  // Iterate through each key - value pair
+  for (const [key, value] of Object.entries(assistance)) {
+    // Fill the list of invalid fields if it is not valid for each value
+    switch (key) {
+      case 'comment':
+        if (!validateString(value)) invalidFields.push(key)
+        break
+      case 'rating':
+        if (!validateEventRating(value)) invalidFields.push(key)
+        break
+    }
+  }
+
+  // Check if assistance fields are optional
+  if (areFieldsOptional) {
+    // Filter invalid fields list to get only those incorrectly fulfilled
+    invalidFields = invalidFields.filter((field: string) => {
+      // Set field as an assistance property
+      const property = field as AssistanceKey
+
+      // Check if value of the assistance property is fulfilled
+      return !(assistance[property] === undefined)
     })
   }
 
