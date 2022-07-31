@@ -1,9 +1,14 @@
 import { PublicUser, User, UserWithId } from '../models/user/user'
+import { UserStatistics } from '../models/user/user_statistics'
 
 import { UserDAO } from '../dao/user_dao'
 
+import { getAverageRatingOfEventsCreatedByUser, getEventsByOwnerId } from './event_controller'
+import { getFriends, getFriendshipRequests } from './friendship_controller'
+
 import { isNumber, isObject, validateString, validateUser } from '../utils/validator'
 import { encryptPassword } from '../utils/cypher'
+import { getAssistancesByUser } from './assistance_controller'
 
 const userDAO = new UserDAO()
 
@@ -166,4 +171,23 @@ export const deleteUser = async (id: number): Promise<void> => {
  */
 export const getUserFriends = async (userId: number): Promise<PublicUser[]> => {
   return await userDAO.getUserFriends(userId).then((friends) => friends)
+}
+
+/**
+ * Function to get all the statistics of a user.
+ * @param userId - ID of the user.
+ * @returns {Promise<UserStatistics>} Statistics of the user.
+ */
+export const getUserStatistics = async (userId: number): Promise<UserStatistics> => {
+  const averageRating = await getAverageRatingOfEventsCreatedByUser(userId)
+
+  const stats: UserStatistics = {
+    created_events_counter: await getEventsByOwnerId(userId).then((events) => events.length),
+    events_average_rating: averageRating,
+    friends_counter: await getFriends(userId).then((friends) => friends.length),
+    received_pending_friend_requests_counter: await getFriendshipRequests(userId).then((friendRequests) => friendRequests.length),
+    attended_events_counter: await getAssistancesByUser(userId).then((assistances) => assistances.length)
+  }
+
+  return stats
 }

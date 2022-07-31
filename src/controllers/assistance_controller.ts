@@ -111,3 +111,12 @@ export const updateAssistance = async (assistance: Assistance): Promise<Assistan
 
   return updatedAssistance
 }
+
+/**
+ * Function to get all the assistances of a user.
+ * @param {number} userId - ID of the user.
+ * @returns {Promise<Assistance[]>} List of assistances of a user.
+ */
+export const getAssistancesByUser = async (userId: number): Promise<Assistance[]> => {
+  return await assistanceDAO.getAssistancesByUser(userId)
+}

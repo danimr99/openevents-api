@@ -366,4 +366,27 @@ export class EventDAO {
       })
     )
   }
+
+  /**
+   * Function to calculate the average rating received on all the events
+   * created by a user from the database.
+   * @param {number} userId - ID of the user.
+   * @returns {Promise<number>} Average rating.
+   */
+  async getAverageRatingOfEventsCreatedByUser (userId: number): Promise<number> {
+    let result: any
+
+    return await Promise<number>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT ROUND(AVG(a.rating), 2) AS average_score FROM assistances AS a WHERE a.event_id IN ' +
+        '(SELECT e.id FROM events AS e WHERE e.owner_id = ?) AND a.rating IS NOT NULL',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to number
+        result = JSON.parse(JSON.stringify(rows))[0]
+        return result.average_score === null ? 0 : result.average_score
+      })
+    )
+  }
 }

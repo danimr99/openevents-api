@@ -20,7 +20,7 @@ export const getFriendshipRequests = async (userId: number): Promise<Friendship[
 }
 
 /**
- * Function to get all the friends of a {@link User}.
+ * Function to get all the friends of a user.
  * @param {number} userId - ID of the user to check.
  * @returns {Promise<PublicUser[]>} List of friends of the user specified.
  */

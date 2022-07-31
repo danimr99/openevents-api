@@ -213,6 +213,32 @@ paths:
           description: Invalid user ID.
         "404":
           description: User does not exist or was not found.
+          
+  /users/{user_id}/statistics:
+    get:
+      tags:
+        - Users
+      summary: Gets statistics of a user with matching ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        "200":
+          description: User statistics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUserStatistics'   
+        "400":
+          description: Invalid user ID.
+        "404":
+          description: User does not exist or was not found.        
 
   /users/{user_id}/events/future:
     get:
@@ -1056,6 +1082,24 @@ components:
           type: string
           description: Link URL of the profile image of the user
           example: "https://i.imgur.com/ghy8Xx1.png"
+    ResponseUserStatistics:
+      type: object
+      properties:
+        created_events_counter:
+          type: number
+          example: 12
+        events_average_rating:
+          type: number
+          example: 4.2
+        friends_counter:
+          type: number
+          example: 34
+        received_pending_friend_requests_counter:
+          type: number
+          example: 7
+        attended_events_counter:
+          type: number
+          example: 21
     ResponseUserWithId:
       type: object
       properties:

@@ -11,7 +11,7 @@ import { parseAllUser, parsePartialUser, parseCredentials, parseUserId } from '.
 
 import {
   createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUserFriends, getUsersByEmail, getUsersById,
-  getUsersByTextSearch, updateUserInformation
+  getUsersByTextSearch, getUserStatistics, updateUserInformation
 } from '../controllers/user_controller'
 import {
   getActiveEventsAttendedByUserId, getActiveEventsByOwnerId, getEventsAttendedByUserId,
@@ -271,6 +271,67 @@ router.get('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res:
       next(
         new ErrorAPI(
           DatabaseMessage.ERROR_SELECTING_USER_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that gets statistics of a user with matching ID.
+ * HTTP Method: GET
+ * Endpoint: "/users/{user_id}/statistics"
+ */
+router.get('/:user_id/statistics', authenticateJWT, parseUserId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get user ID from the URL path sent as parameter
+  const userId = res.locals.PARSED_USER_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId
+    }
+  }
+
+  // Check if user exists
+  await existsUserById(userId)
+    .then(async (existsUser) => {
+      if (existsUser) {
+        // User exists
+        await getUserStatistics(userId)
+          .then((stats) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(stats)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_USER_STATS,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // User does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.USER_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_USER_BY_ID,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )

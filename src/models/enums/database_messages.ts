@@ -37,5 +37,6 @@ export enum DatabaseMessage {
   ERROR_SELECTING_EVENT_ASSISTANCES = 'An error has occurred while fetching all assistances of an event from the database',
   ERROR_INSERTING_ASSISTANCE = 'An error has occurred while creating a new assistance of a user for an event to the database',
   ERROR_CHECKING_ASSISTANCE = 'An error has occurred while checking if exists an assistance of a user for an event on the database',
-  ERROR_UPDATING_ASSISTANCE = 'An error has occurred while updating an assistance from the database'
+  ERROR_UPDATING_ASSISTANCE = 'An error has occurred while updating an assistance from the database',
+  ERROR_SELECTING_USER_STATS = 'An error has occurred while fetching statistics of a user from the database'
 }

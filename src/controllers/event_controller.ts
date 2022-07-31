@@ -274,3 +274,13 @@ export const hasEventFinished = async (eventId: number): Promise<boolean> => {
       }
     })
 }
+
+/**
+ * Function to calculate the average rating received on all the events
+ * created by a user.
+ * @param {number} userId - ID of the user.
+ * @returns {Promise<number>} Average rating.
+ */
+export const getAverageRatingOfEventsCreatedByUser = async (userId: number): Promise<number> => {
+  return await eventDAO.getAverageRatingOfEventsCreatedByUser(userId)
+}

@@ -92,4 +92,25 @@ export class AssistanceDAO {
       )
     )
   }
+
+  /**
+   * Function to get all the assistances of a user from the database.
+   * @param {number} userId - ID of the user.
+   * @returns {Promise<Assistance[]>} List of assistances of a user.
+   */
+  async getAssistancesByUser (userId: number): Promise<Assistance[]> {
+    let result: Assistance[]
+
+    return await Promise<Assistance[]>.resolve(
+      // Query to database
+      databaseConnection.promise().query(
+        'SELECT * FROM assistances WHERE user_id = ?',
+        [userId]
+      ).then(([rows]) => {
+        // Convert from database result object to assistance
+        result = JSON.parse(JSON.stringify(rows))
+        return result
+      })
+    )
+  }
 }
