@@ -4,113 +4,89 @@ import { databaseConnection } from '../utils/database'
 
 export class AssistanceDAO {
   /**
-   * Function to get an {@link Assistance} of a user for an event
-   * from the database.
+   * Function to get an assistance of a user for an event from the database.
    * @param {number} userId - ID of a user.
    * @param {number} eventId - ID of an event.
    * @returns {Promise<Assistance[]>} Assistance of a user for an event.
    */
   async getUserAssistanceForEvent (userId: number, eventId: number): Promise<Assistance[]> {
-    let result: Assistance[]
-
-    return await Promise<Assistance[]>.resolve(
-      // Query to database
-      databaseConnection.promise().query(
-        'SELECT * FROM assistances WHERE user_id = ? AND event_id = ?',
-        [userId, eventId]
-      ).then(([rows]) => {
-        // Convert from database result object to assistance
-        result = JSON.parse(JSON.stringify(rows))
-        return result
-      })
-    )
+    // Select assistance of a user for an event
+    return await databaseConnection.promise().query(
+      'SELECT * FROM assistances WHERE user_id = ? AND event_id = ?',
+      [userId, eventId]
+    ).then(([rows]) => {
+      // Convert from database result object to list of assistances
+      return JSON.parse(JSON.stringify(rows)) as Assistance[]
+    })
   }
 
   /**
-   * Function to delete an {@link Assistance} of a {@link User} for an {@link Event}
-   * from the database.
-   * @param {number} userId - ID of the user.
-   * @param {number} eventId - ID of the event.
+   * Function to delete an assistance of a user for an event from the database.
+   * @param {number} userId - ID of a user.
+   * @param {number} eventId - ID of an event.
    */
-  async deleteUserAssistanceForEvent (userId: number, eventId: number): Promise<any> {
-    return await Promise<any>.resolve(
-      // Delete event with the specified ID from the database
-      databaseConnection.promise().query(
-        'DELETE FROM assistances WHERE user_id = ? AND event_id = ?',
-        [userId, eventId]
-      )
+  async deleteUserAssistanceForEvent (userId: number, eventId: number): Promise<void> {
+    // Delete event with the specified ID from the database
+    await databaseConnection.promise().query(
+      'DELETE FROM assistances WHERE user_id = ? AND event_id = ?',
+      [userId, eventId]
     )
   }
 
   /**
-   * Function to get all assistances of an {@link Event} from the database.
-   * @param {number} eventId - ID of the event.
-   * @returns {Promise<Assistance[]>} List of assistances of the specified event.
+   * Function to get all assistances of an event from the database.
+   * @param {number} eventId - ID of an event.
+   * @returns {Promise<Assistance[]>} List of assistances of an event.
    */
   async getEventAssistances (eventId: number): Promise<Assistance[]> {
-    let result: Assistance[]
-
-    return await Promise<Assistance[]>.resolve(
-      // Query to database
-      databaseConnection.promise().query(
-        'SELECT * FROM assistances WHERE event_id = ?',
-        [eventId]
-      ).then(([rows]) => {
-        // Convert from database result object to assistance
-        result = JSON.parse(JSON.stringify(rows))
-        return result
-      })
-    )
+    // Select all assistance of a specified event
+    return await databaseConnection.promise().query(
+      'SELECT * FROM assistances WHERE event_id = ?',
+      [eventId]
+    ).then(([rows]) => {
+      // Convert from database result object to list of assistances
+      return JSON.parse(JSON.stringify(rows)) as Assistance[]
+    })
   }
 
   /**
-   * Function to create an {@link Assistance} of a {@link User} for an {@link Event}
-   * on the database.
-   * @param {number} userId - ID of the user.
-   * @param {number} eventId - ID of the event.
+   * Function to create an assistance of a user for an event on the database.
+   * @param {number} userId - ID of a user.
+   * @param {number} eventId - ID of an event.
    */
-  async createUserAssistanceForEvent (userId: number, eventId: number): Promise<any> {
-    return await Promise<any>.resolve(
-      // Insert into database
-      databaseConnection.promise().query(
-        'INSERT INTO assistances (user_id, event_id) VALUES (?, ?)',
-        [userId, eventId]
-      )
+  async createUserAssistanceForEvent (userId: number, eventId: number): Promise<void> {
+    // Create an assistance of a user for an event
+    await databaseConnection.promise().query(
+      'INSERT INTO assistances (user_id, event_id) VALUES (?, ?)',
+      [userId, eventId]
     )
   }
 
   /**
-   * Function to update an {@link Assistance} from the database.
+   * Function to update an assistance from the database.
    * @param {Assistance} assistance - Assistance to update.
    */
-  async updateAssistance (assistance: Assistance): Promise<any> {
-    return await Promise<any>.resolve(
-      // Update assistance on the database
-      databaseConnection.promise().query(
-        'UPDATE assistances SET comment = ?, rating = ? WHERE user_id = ? AND event_id = ?',
-        [assistance.comment, assistance.rating, assistance.user_id, assistance.event_id]
-      )
+  async updateAssistance (assistance: Assistance): Promise<void> {
+    // Update comment and rating of an assistance
+    await databaseConnection.promise().query(
+      'UPDATE assistances SET comment = ?, rating = ? WHERE user_id = ? AND event_id = ?',
+      [assistance.comment, assistance.rating, assistance.user_id, assistance.event_id]
     )
   }
 
   /**
-   * Function to get all the assistances of a user from the database.
-   * @param {number} userId - ID of the user.
+   * Function to get all assistances of a user from the database.
+   * @param {number} userId - ID of a user.
    * @returns {Promise<Assistance[]>} List of assistances of a user.
    */
   async getAssistancesByUser (userId: number): Promise<Assistance[]> {
-    let result: Assistance[]
-
-    return await Promise<Assistance[]>.resolve(
-      // Query to database
-      databaseConnection.promise().query(
-        'SELECT * FROM assistances WHERE user_id = ?',
-        [userId]
-      ).then(([rows]) => {
-        // Convert from database result object to assistance
-        result = JSON.parse(JSON.stringify(rows))
-        return result
-      })
-    )
+    // Select all assistances of a user
+    return await databaseConnection.promise().query(
+      'SELECT * FROM assistances WHERE user_id = ?',
+      [userId]
+    ).then(([rows]) => {
+      // Convert from database result object to list of assistances
+      return JSON.parse(JSON.stringify(rows)) as Assistance[]
+    })
   }
 }

@@ -8,9 +8,9 @@ import { validateAssistance } from '../utils/validator'
 const assistanceDAO = new AssistanceDAO()
 
 /**
- * Function to get an {@link Assistance} of a user for an event.
+ * Function to get an assistance of a user for an event.
  * @param {number} userId - ID of a user.
- * @param eventId - ID of an event.
+ * @param {number} eventId - ID of an event.
  * @returns {Promise<Assistance[]>} List containing the assistance of a user for an event.
  */
 export const getUserAssistanceForEvent = async (userId: number, eventId: number): Promise<Assistance[]> => {
