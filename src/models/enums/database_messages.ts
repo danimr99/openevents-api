@@ -34,5 +34,6 @@ export enum DatabaseMessage {
   ERROR_SELECTING_FINISHED_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all finished events attended by a user along with the comment and rating given from the database',
   ERROR_SELECTING_ACTIVE_EVENTS_AND_ASSISTANCES_USER = 'An error has occurred while fetching all active events attended by a user along with the comment and rating given from the database',
   ERROR_SELECTING_USER_FRIENDS = 'An error has occurred while fetching all friends of a user from the database',
-  ERROR_SELECTING_EVENT_ASSISTANCES = 'An error has occurred while fetching all assistances of an event from the database'
+  ERROR_SELECTING_EVENT_ASSISTANCES = 'An error has occurred while fetching all assistances of an event from the database',
+  ERROR_INSERTING_ASSISTANCE = 'An error has occurred while creating a new assistance of a user for an event to the database'
 }

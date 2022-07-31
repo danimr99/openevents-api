@@ -62,4 +62,20 @@ export class AssistanceDAO {
       })
     )
   }
+
+  /**
+   * Function to create an {@link Assistance} of a {@link User} for an {@link Event}
+   * on the database.
+   * @param {number} userId - ID of the user.
+   * @param {number} eventId - ID of the event.
+   */
+  async createUserAssistanceForEvent (userId: number, eventId: number): Promise<any> {
+    return await Promise<any>.resolve(
+      // Insert into database
+      databaseConnection.promise().query(
+        'INSERT INTO assistances (user_id, event_id) VALUES (?, ?)',
+        [userId, eventId]
+      )
+    )
+  }
 }

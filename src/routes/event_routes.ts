@@ -14,7 +14,7 @@ import {
 } from '../controllers/event_controller'
 
 import { formatErrorSQL } from '../utils/database'
-import { getEventAssistances, getUserAssistanceForEvent } from '../controllers/assistance_controller'
+import { createUserAssistanceForEvent, getEventAssistances, getUserAssistanceForEvent } from '../controllers/assistance_controller'
 import { existsUserById } from '../controllers/user_controller'
 
 // Create a router for events
@@ -382,6 +382,82 @@ router.get('/:event_id/assistances', authenticateJWT, parseEventId, async (_req:
             next(
               new ErrorAPI(
                 DatabaseMessage.ERROR_SELECTING_EVENT_ASSISTANCES,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
+      } else {
+        // Event does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.EVENT_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+      // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that creates an assistance of the authenticated user for event with matching ID.
+ * HTTP Method: POST
+ * Endpoint: "/events/{event_id}/assistances"
+ */
+router.post('/:event_id/assistances', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId,
+      event_id: eventId
+    }
+  }
+
+  // Check if event exists
+  await existsEventById(eventId)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+        // Event exists
+        await createUserAssistanceForEvent(userId, eventId)
+          .then((actionMessage) => {
+            // Get HTTP status code
+            let httpStatusCode: HttpStatusCode = HttpStatusCode.CREATED
+
+            if (actionMessage === APIMessage.ASSISTANCE_ALREADY_EXISTS) {
+              httpStatusCode = HttpStatusCode.OK
+            }
+
+            // Send response
+            res.status(httpStatusCode).json({
+              message: actionMessage,
+              stacktrace
+            })
+          })
+          .catch((error) => {
+          // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_INSERTING_ASSISTANCE,
                 HttpStatusCode.INTERNAL_SERVER_ERROR,
                 stacktrace
               )

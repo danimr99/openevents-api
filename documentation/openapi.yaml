@@ -605,6 +605,46 @@ paths:
           description: Invalid event ID.
         "404":
           description: Event does not exist or was not found.
+    post:
+      tags:
+        - Events
+      summary: Creates an assistance of the authenticated user for the event with matching ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
+      responses:
+        "200":
+          description: Already exists an assistance of the user for the event.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  stacktrace:
+                    type: object
+        "201":
+          description: Assistance created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  stacktrace:
+                    type: object
+        "400":
+          description: Invalid event ID.
+        "404":
+          description: Event does not exist or was not found.
 
   /events/{event_id}/assistances/{user_id}:
     get:

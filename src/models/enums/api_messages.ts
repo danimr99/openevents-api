@@ -38,5 +38,7 @@ export enum APIMessage {
   ERROR_CANNOT_DELETE_FRIEND_REQUEST_ITSELF = 'You cannot delete or reject a friendship with yourself',
   FRIEND_REQUEST_DELETED = 'Friend request or friendship has been deleted',
   ASSISTANCE_DELETED = 'Assistance has been deleted',
-  ASSISTANCE_NOT_FOUND = 'Assistance does not exist or was not found'
+  ASSISTANCE_NOT_FOUND = 'Assistance does not exist or was not found',
+  ASSISTANCE_CREATED = 'Assistance has been created',
+  ASSISTANCE_ALREADY_EXISTS = 'User has already joined the event'
 }
