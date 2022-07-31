@@ -8,7 +8,7 @@ import { DatabaseMessage } from '../models/enums/database_messages'
 import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseEventId, parseUserId } from '../middlewares/parser'
 
-import { existsEventById, getEventsById } from '../controllers/event_controller'
+import { existsEventById, getEventById } from '../controllers/event_controller'
 import { existsUserById } from '../controllers/user_controller'
 import {
   deleteUserAssistanceForEvent, existsAssistance, getUserAssistanceForEvent
@@ -149,10 +149,8 @@ router.delete('/:user_id/:event_id', authenticateJWT, parseUserId, parseEventId,
             .then(async (existsEvent) => {
               if (existsEvent) {
                 // Event exists
-                await getEventsById(eventId)
-                  .then(async (events) => {
-                    const event = events[0]
-
+                await getEventById(eventId)
+                  .then(async (event) => {
                     // Check if authenticated user is the owner of the event
                     if (authenticatedUserId === event.owner_id) {
                       // Authenticated user is the event owner

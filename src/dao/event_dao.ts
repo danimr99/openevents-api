@@ -47,16 +47,16 @@ export class EventDAO {
   /**
    * Function to get an event by ID from the database.
    * @param {number} id - ID to search.
-   * @returns {Promise<EventWithId[]>} List of events with the specified ID.
+   * @returns {Promise<EventWithId>} Event with matching ID.
    */
-  async getEventById (id: number): Promise<EventWithId[]> {
+  async getEventById (id: number): Promise<EventWithId> {
     // Select event by ID
     return await databaseConnection.promise().query(
       'SELECT * FROM events WHERE id = ?',
       [id]
     ).then(([rows]) => {
       // Convert from database result object to list of events
-      return JSON.parse(JSON.stringify(rows)) as EventWithId[]
+      return JSON.parse(JSON.stringify(rows)) as EventWithId
     })
   }
 

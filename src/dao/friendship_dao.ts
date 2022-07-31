@@ -46,16 +46,16 @@ export class FriendshipDAO {
    * from the database.
    * @param {number} userId - ID of a user.
    * @param {number} externalUserId - ID of another user.
-   * @returns {Promise<Friendship[]>} Frienship between both users.
+   * @returns {Promise<Friendship>} Friendship between both users.
    */
-  async getFriendRequest (userId: number, externalUserId: number): Promise<Friendship[]> {
+  async getFriendRequest (userId: number, externalUserId: number): Promise<Friendship> {
     // Select friend request between two users
     return await databaseConnection.promise().query(
       'SELECT * FROM friendships WHERE (user_id = ? AND friend_user_id = ?) OR (user_id = ? AND friend_user_id = ?)',
       [userId, externalUserId, externalUserId, userId]
     ).then(([rows]) => {
-      // Convert from database result object to list of friendships
-      return JSON.parse(JSON.stringify(rows)) as Friendship[]
+      // Convert from database result object to friendship
+      return JSON.parse(JSON.stringify(rows)) as Friendship
     })
   }
 

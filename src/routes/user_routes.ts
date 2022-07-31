@@ -10,7 +10,7 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllUser, parsePartialUser, parseCredentials, parseUserId } from '../middlewares/parser'
 
 import {
-  createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUserFriends, getUsersByEmail, getUsersById,
+  createUser, deleteUser, existsUserByEmail, existsUserById, getAllUsers, getUserFriends, getUsersByEmail, getUserById,
   getUsersByTextSearch, getUserStatistics, updateUserInformation
 } from '../controllers/user_controller'
 import {
@@ -246,12 +246,10 @@ router.get('/:user_id', authenticateJWT, parseUserId, async (_req: Request, res:
   }
 
   // Get user by ID
-  await getUsersById(userId)
-    .then((users) => {
+  await getUserById(userId)
+    .then((user) => {
     // Check if exists user by ID
-      if (users.length === 1) {
-        const user = users[0]
-
+      if (user != null) {
         // Send response
         res.status(HttpStatusCode.OK).json(user)
       } else {

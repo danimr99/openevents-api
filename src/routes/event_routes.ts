@@ -10,7 +10,7 @@ import { authenticateJWT } from '../middlewares/jwt_authentication'
 import { parseAllEvent, parseEventId, parseEventSearch, parsePartialAssistance, parsePartialEvent, parseUserId } from '../middlewares/parser'
 
 import {
-  createEvent, deleteEvent, existsEventById, getAllEvents, getEventsById, getEventsBySearch,
+  createEvent, deleteEvent, existsEventById, getAllEvents, getEventById, getEventsBySearch,
   getFuturePopularEvents,
   hasEventFinished,
   isUserEventOwner, updateEventInformation
@@ -167,12 +167,10 @@ router.get('/:event_id', authenticateJWT, parseEventId, async (_req: Request, re
   }
 
   // Get event by ID
-  await getEventsById(eventId)
-    .then((events) => {
-    // Check if exists event by ID
-      if (events.length === 1) {
-        const event = events[0]
-
+  await getEventById(eventId)
+    .then((event) => {
+      // Check if exists event by ID
+      if (event != null) {
         // Send response
         res.status(HttpStatusCode.OK).json(event)
       } else {

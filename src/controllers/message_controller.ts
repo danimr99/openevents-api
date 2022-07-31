@@ -6,7 +6,7 @@ import { PublicUser } from '../models/user/user'
 const messageDAO = new MessageDAO()
 
 /**
- * Function to create a {@link Message}.
+ * Function to create a message.
  * @param {Message} message - Message to create.
  */
 export const createMessage = async (message: Message): Promise<void> => {
@@ -14,23 +14,22 @@ export const createMessage = async (message: Message): Promise<void> => {
 }
 
 /**
- * Function to get all contacts from a {@link User}.
- * @param {number} userId - ID of the user to get contacts from.
- * @returns {Promise<PublicUser[]>} List of contacts from the specified user.
+ * Function to get all contacts from a user.
+ * @param {number} userId - ID of a user to get contacts from.
+ * @returns {Promise<PublicUser[]>} List of contacts from a user.
  */
 export const getUserContacts = async (userId: number): Promise<PublicUser[]> => {
-  return await messageDAO.getUserContacts(userId).then((users) => users)
+  return await messageDAO.getUserContacts(userId)
 }
 
 /**
- * Function to get all the {@link Message}s exchanged between the
- * authenticated {@link User} and an external {@link User}.
+ * Function to get all the messages exchanged between two users.
  * @param {number} userId - ID of a user.
- * @param {number} externalUserId - ID of the external user.
- * @returns {Promise<Message[]>} List of messages exchanged between specified users.
+ * @param {number} externalUserId - ID of an external user.
+ * @returns {Promise<Message[]>} List of messages exchanged between both users.
  */
 export const getChat = async (userId: number, externalUserId: number): Promise<Message[]> => {
-  return await messageDAO.getChat(userId, externalUserId).then((messages) => messages)
+  return await messageDAO.getChat(userId, externalUserId)
 }
 
 /**
@@ -38,6 +37,6 @@ export const getChat = async (userId: number, externalUserId: number): Promise<M
  * @param {number} userId - ID of a user.
  * @param {number} externalUserId - ID of another user.
  */
-export const deleteChat = async (userId: number, externalUserId: number): Promise<any> => {
-  return await messageDAO.deleteChat(userId, externalUserId)
+export const deleteChat = async (userId: number, externalUserId: number): Promise<void> => {
+  await messageDAO.deleteChat(userId, externalUserId)
 }

@@ -5,10 +5,10 @@ import { UserDAO } from '../dao/user_dao'
 
 import { getAverageRatingOfEventsCreatedByUser, getEventsByOwnerId } from './event_controller'
 import { getFriends, getFriendshipRequests } from './friendship_controller'
+import { getAssistancesByUser } from './assistance_controller'
 
 import { isNumber, isObject, validateString, validateUser } from '../utils/validator'
 import { encryptPassword } from '../utils/cypher'
-import { getAssistancesByUser } from './assistance_controller'
 
 const userDAO = new UserDAO()
 
@@ -18,21 +18,21 @@ const userDAO = new UserDAO()
  * @returns {Promise<UserWithId[]>} List of users by email coincidence.
  */
 export const getUsersByEmail = async (email: string = ''): Promise<UserWithId[]> => {
-  return await userDAO.getUsersByEmail(email).then((result) => result)
+  return await userDAO.getUsersByEmail(email)
 }
 
 /**
- * Function to get a {@link UserWithId} by ID.
+ * Function to get a user by ID.
  * @param {number} id - ID to search.
- * @returns {Promise<UserWithId[]>} List of users by ID.
+ * @returns {Promise<UserWithId>} User with matching ID.
  */
-export const getUsersById = async (id: number): Promise<UserWithId[]> => {
-  return await userDAO.getUserById(id).then((result) => result)
+export const getUserById = async (id: number): Promise<UserWithId> => {
+  return await userDAO.getUserById(id)
 }
 
 /**
- * Function to check if a {@link User} exists by email address.
- * @param {string} email - Email address of the user to check.
+ * Function to check if a user exists by email address.
+ * @param {string} email - Email address of a user to check.
  * @returns {boolean} True if a user with the specified email exists, false otherwise.
  */
 export const existsUserByEmail = async (email: string = ''): Promise<boolean> => {
@@ -54,19 +54,19 @@ export const existsUserByEmail = async (email: string = ''): Promise<boolean> =>
 }
 
 /**
- * Function to check if a {@link User} exists by ID.
- * @param {number} id - ID of the user to check.
+ * Function to check if a user exists by ID.
+ * @param {number} id - ID of a user to check.
  * @returns {boolean} True if a user with the specified ID exists, false otherwise.
  */
 export const existsUserById = async (id: number): Promise<boolean> => {
   if (isNumber(id)) {
     // Get user by id
-    const usersList = await getUsersById(id)
+    const user = await getUserById(id)
 
     // Check if user has data
-    if (isObject(usersList) && usersList.length > 0) {
+    if (isObject(user) && user != null) {
       // Check if ID matches
-      return usersList[0].id === id
+      return user.id === id
     }
   }
 
@@ -74,46 +74,41 @@ export const existsUserById = async (id: number): Promise<boolean> => {
 }
 
 /**
- * Function to create a {@link User}.
+ * Function to create a user.
  * @param {User} user - User to create.
  */
 export const createUser = async (user: Required<User>): Promise<void> => {
   if (validateUser(user, false).length === 0) {
-    // Insert user into database
+    // Insert user
     await userDAO.insertUser(user)
   }
 }
 
 /**
- * Function to get all the {@link PublicUser}s from the database.
- * @returns {Promise<PublicUser[]>} List of all the users without their password.
+ * Function to get all users.
+ * @returns {Promise<PublicUser[]>} List of all users.
  */
 export const getAllUsers = async (): Promise<PublicUser[]> => {
-  return await userDAO.getAllUsers().then((result) => result)
+  return await userDAO.getAllUsers()
 }
 
 /**
- * Function to get all the {@link PublicUser}s from the database whose name,
- * last name or email matches with the text.
+ * Function to get all users whose name, last name or email matches with the text.
  * @param {string} text - Text to search.
- * @returns {Promise<PublicUser[]} List of all users without their password that
- * match with the search text.
+ * @returns {Promise<PublicUser[]} List of all users that match with the search text.
  */
 export const getUsersByTextSearch = async (text: string): Promise<PublicUser[]> => {
-  return await userDAO.getUsersByTextSearch(text).then((result) => result)
+  return await userDAO.getUsersByTextSearch(text)
 }
 
 /**
- * Function to update the information of a {@link User}.
- * @param {number} id - ID of the user to update.
+ * Function to update the information of a user.
+ * @param {number} id - ID of a user to update.
  * @param {User} user - User with the updated information.
  */
 export const updateUserInformation = async (id: number, user: User): Promise<UserWithId> => {
   // Get user by ID with the existing information
-  const existingUser = await getUsersById(id)
-    .then((users) => {
-      return users[0]
-    })
+  const existingUser = await getUserById(id)
 
   // Get the user fields that are not marked as updatable
   const notUpdatableFields = validateUser(user, false)
@@ -146,14 +141,14 @@ export const updateUserInformation = async (id: number, user: User): Promise<Use
     }
   })
 
+  // Update user
   await userDAO.updateUserById(updatedUser)
 
   return updatedUser
 }
 
 /**
- * Fucntion to delete a {@link User} and all the information related with it
- * from the database.
+ * Function to delete a user and all the information related with it.
  * @param {number} id - ID of the user to delete.
  */
 export const deleteUser = async (id: number): Promise<void> => {
@@ -165,18 +160,18 @@ export const deleteUser = async (id: number): Promise<void> => {
 }
 
 /**
- * Function to get all friends of a {@link User}.
- * @param {number} userId - ID of the user.
- * @returns {Promise<PublicUser[]>} List of friends of the specified user.
+ * Function to get all friends of a user.
+ * @param {number} userId - ID of a user.
+ * @returns {Promise<PublicUser[]>} List of friends of a user.
  */
 export const getUserFriends = async (userId: number): Promise<PublicUser[]> => {
-  return await userDAO.getUserFriends(userId).then((friends) => friends)
+  return await userDAO.getUserFriends(userId)
 }
 
 /**
- * Function to get all the statistics of a user.
- * @param userId - ID of the user.
- * @returns {Promise<UserStatistics>} Statistics of the user.
+ * Function to get statistics of a user.
+ * @param userId - ID of a user.
+ * @returns {Promise<UserStatistics>} Statistics of a user.
  */
 export const getUserStatistics = async (userId: number): Promise<UserStatistics> => {
   const averageRating = await getAverageRatingOfEventsCreatedByUser(userId)

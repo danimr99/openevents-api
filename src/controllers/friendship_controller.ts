@@ -4,60 +4,61 @@ import { PublicUser } from '../models/user/user'
 import { APIMessage } from '../models/enums/api_messages'
 
 import { FriendshipDAO } from '../dao/friendship_dao'
-import { MessageDAO } from '../dao/message_dao'
+
+import { deleteChat } from './message_controller'
 
 const friendshipDAO = new FriendshipDAO()
-const messageDAO = new MessageDAO()
 
 /**
- * Function to get all the pending {@link Friendship} requests
- * to be accepted by a user.
- * @param {number} userId - ID of the user to get friendship requests from.
+ * Function to get all pending friendship requests to be accepted by a user.
+ * @param {number} userId - ID of a user to get friendship requests from.
  * @returns {Promise<Friendship[]>} List of friendship requests.
  */
 export const getFriendshipRequests = async (userId: number): Promise<Friendship[]> => {
-  return await friendshipDAO.getFriendshipRequests(userId).then((friendRequests) => friendRequests)
+  return await friendshipDAO.getFriendshipRequests(userId)
 }
 
 /**
- * Function to get all the friends of a user.
- * @param {number} userId - ID of the user to check.
+ * Function to get all friends of a user.
+ * @param {number} userId - ID of a user to check.
  * @returns {Promise<PublicUser[]>} List of friends of the user specified.
  */
 export const getFriends = async (userId: number): Promise<PublicUser[]> => {
-  return await friendshipDAO.getFriends(userId).then((friends) => friends)
+  return await friendshipDAO.getFriends(userId)
 }
 
 /**
- * Function to check whether exists or not a friend request between two {@link User}s.
+ * Function to check whether exists or not a friend request between two users.
  * @param {number} userId - ID of a user.
  * @param {number} externalUserId - ID of another user.
  * @returns {Promise<Boolean>} True if exists a friend request between both users, false otherwise.
  */
 export const existsFriendRequest = async (userId: number, externalUserId: number): Promise<boolean> => {
   return await friendshipDAO.getFriendRequest(userId, externalUserId)
-    .then((friendRequests) => {
-      // Check if exists or not a friend request
-      return friendRequests.length === 1
+    .then((friendRequest) => {
+      // Check if exists a friend request
+      if (friendRequest != null) {
+        return true
+      } else {
+        return false
+      }
     }).catch(() => {
       return false
     })
 }
 
 /**
- * Function to create a friend request
+ * Function to create a friend request.
  * @param userId - ID of a user.
  * @param externalUserId - ID of another user.
  * @returns {Promise<string>} Message notification informing of the action completed.
  */
 export const createFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
   return await friendshipDAO.getFriendRequest(userId, externalUserId)
-    .then(async (friendRequests) => {
+    .then(async (friendRequest) => {
       // Check if exists friend request between users
-      if (friendRequests.length === 1) {
+      if (friendRequest != null) {
         // Friend request exists
-        const friendRequest = friendRequests[0]
-
         // Check the friend request status
         if (friendRequest.status === FriendshipStatus.ACCEPTED) {
           // Friend request is already accepted
@@ -87,19 +88,17 @@ export const createFriendRequest = async (userId: number, externalUserId: number
 }
 
 /**
- * Function to accept a friend request
+ * Function to accept a friend request.
  * @param userId - ID of a user.
  * @param externalUserId - ID of another user.
  * @returns {Promise<string>} Message notification informing of the action completed.
  */
 export const acceptFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
   return await friendshipDAO.getFriendRequest(userId, externalUserId)
-    .then(async (friendRequests) => {
+    .then(async (friendRequest) => {
       // Check if exists friend request between users
-      if (friendRequests.length === 1) {
+      if (friendRequest != null) {
         // Friend request exists
-        const friendRequest = friendRequests[0]
-
         // Check friend request status
         if (friendRequest.status === FriendshipStatus.ACCEPTED) {
           // Friend request is already accepted
@@ -133,15 +132,15 @@ export const acceptFriendRequest = async (userId: number, externalUserId: number
  */
 export const deleteFriendRequest = async (userId: number, externalUserId: number): Promise<string> => {
   return await friendshipDAO.getFriendRequest(userId, externalUserId)
-    .then(async (friendRequests) => {
-    // Check if exists friend request between users
-      if (friendRequests.length === 1) {
+    .then(async (friendRequest) => {
+      // Check if exists friend request between users
+      if (friendRequest != null) {
         // Friend request exists
         // Delete friend request
         await friendshipDAO.deleteFriendRequest(userId, externalUserId)
 
         // Delete chat between users
-        await messageDAO.deleteChat(userId, externalUserId)
+        await deleteChat(userId, externalUserId)
 
         return APIMessage.FRIEND_REQUEST_DELETED
       } else {
