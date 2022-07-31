@@ -679,6 +679,30 @@ paths:
           description: Event cannot neither be commented or rated because it has not finished yet.
         "404":
           description: Event or assistance does not exist or was not found.
+    delete:
+      tags:
+        - Events
+      summary: Deletes an assistance of the authenticated user for the event with matching ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
+      responses:
+        "200":
+          description: Assistance deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseAssistance'
+        "400":
+          description: Invalid event ID.
+        "404":
+          description: Event or assistance does not exist or was not found.
 
   /events/{event_id}/assistances/{user_id}:
     get:

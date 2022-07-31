@@ -15,7 +15,7 @@ import {
   isUserEventOwner, updateEventInformation
 } from '../controllers/event_controller'
 import {
-  createUserAssistanceForEvent, existsAssistance, getEventAssistances, getUserAssistanceForEvent,
+  createUserAssistanceForEvent, deleteUserAssistanceForEvent, existsAssistance, getEventAssistances, getUserAssistanceForEvent,
   updateAssistance
 } from '../controllers/assistance_controller'
 import { existsUserById } from '../controllers/user_controller'
@@ -583,6 +583,87 @@ router.put('/:event_id/assistances', authenticateJWT, parseEventId, parsePartial
       }
     }).catch((error) => {
       // Add thrown error to stacktrace
+      stacktrace.error_sql = formatErrorSQL(error)
+
+      next(
+        new ErrorAPI(
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+          HttpStatusCode.INTERNAL_SERVER_ERROR,
+          stacktrace
+        )
+      )
+    })
+})
+
+/**
+ * Route that deletes an assistance of the authenticated user for the event with matching ID.
+ * HTTP Method: DELETE
+ * Endpoint: "/events/{event_id}/assistances"
+ */
+router.delete('/:event_id/assistances', authenticateJWT, parseEventId, parsePartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
+  // Get authenticated user ID
+  const userId: number = res.locals.JWT_USER_ID
+
+  // Get event ID from the URL path sent as parameter
+  const eventId = res.locals.PARSED_EVENT_ID
+
+  // Create stacktrace
+  const stacktrace: any = {
+    _original: {
+      user_id: userId,
+      event_id: eventId
+    }
+  }
+
+  // Check if event exists
+  await existsEventById(eventId)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+        // Event exists
+        await existsAssistance(userId, eventId)
+          .then(async (existsAssistance) => {
+            if (existsAssistance) {
+              await deleteUserAssistanceForEvent(userId, eventId)
+                .then(() => {
+                  // Send response
+                  res.status(HttpStatusCode.OK).json({
+                    message: APIMessage.ASSISTANCE_DELETED,
+                    stacktrace
+                  })
+                }).catch((error) => {
+                  // Add thrown error to stacktrace
+                  stacktrace.error_sql = formatErrorSQL(error)
+
+                  next(
+                    new ErrorAPI(
+                      DatabaseMessage.ERROR_DELETING_USER_ASSISTANCE_FOR_EVENT,
+                      HttpStatusCode.INTERNAL_SERVER_ERROR,
+                      stacktrace
+                    )
+                  )
+                })
+            } else {
+              next(
+                new ErrorAPI(
+                  APIMessage.ASSISTANCE_NOT_FOUND,
+                  HttpStatusCode.NOT_FOUND,
+                  stacktrace
+                )
+              )
+            }
+          })
+      } else {
+        // Event does not exist
+        next(
+          new ErrorAPI(
+            APIMessage.EVENT_NOT_FOUND,
+            HttpStatusCode.NOT_FOUND,
+            stacktrace
+          )
+        )
+      }
+    }).catch((error) => {
+    // Add thrown error to stacktrace
       stacktrace.error_sql = formatErrorSQL(error)
 
       next(
