@@ -126,7 +126,7 @@ Transpile TypeScript to JavaScript (it will generate build folder on the root di
 <!-- License -->
 ## :warning: License
 
-Distributed under the MIT License. See LICENSE.txt for more information.
+Distributed under the MIT License. See LICENSE.md for more information.
 
 
 <!-- Acknowledgments -->
