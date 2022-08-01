@@ -24,9 +24,6 @@
   <a href="https://github.com/danimr99/openevents-api/issues/">
     <img src="https://img.shields.io/github/issues/danimr99/openevents-api" alt="open issues" />
   </a>
-  <a href="https://github.com/danimr99/openevents-api/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/danimr99/openevents-api.svg" alt="license" />
-  </a>
 </p>
    
 <h4>
