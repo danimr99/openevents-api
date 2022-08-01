@@ -19,6 +19,7 @@ USE openevents;
 CREATE TABLE IF NOT EXISTS `assistances` (
   `user_id` int(11) NOT NULL,
   `event_id` int(11) NOT NULL,
+  `format` int(11) NOT NULL DEFAULT 0 COMMENT '0: FACE-TO-FACE\n1: ONLINE\n',
   `rating` int(11) DEFAULT NULL,
   `comment` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

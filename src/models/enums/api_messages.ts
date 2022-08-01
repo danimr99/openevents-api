@@ -44,5 +44,7 @@ export enum APIMessage {
   ERROR_INVALID_EVENT_RATING_I = 'Must be a number between',
   ERROR_INVALID_EVENT_RATING_II = 'and',
   ERROR_INVALID_ASSISTANCE_FIELDS = 'All assistance information must be properly fulfilled',
-  EVENT_NOT_FINISHED = 'Event cannot be neither commented or rated because it has not finished yet'
+  EVENT_NOT_FINISHED_ASSISTANCE = 'Event cannot be neither commented or rated because it has not finished yet',
+  EVENT_FINISHED_ASSISTANCE = 'You cannot join a finished event',
+  EVENT_REACHED_MAX_ATTENDANTS = 'Event has reached the maximum number of face-to-face attendants'
 }

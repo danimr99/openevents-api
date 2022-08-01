@@ -4,7 +4,9 @@ import { EventDAO } from '../dao/event_dao'
 
 import { isNumber, isObject, validateEvent, validateString } from '../utils/validator'
 import { getCurrentDate, toDate } from '../utils/dates'
-import { deleteAssistancesOfEvent } from './assistance_controller'
+import { deleteAssistancesOfEvent, getFaceToFaceEventAttendants } from './assistance_controller'
+import { EventFormat } from '../models/event/event_format'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 
 const eventDAO = new EventDAO()
 
@@ -30,7 +32,7 @@ export const createEvent = async (event: Event): Promise<void> => {
  * @returns {Promise<EventWithId[]>} List of events by ID.
  */
 export const getEventById = async (eventId: number): Promise<EventWithId> => {
-  return await eventDAO.getEventById(eventId)
+  return await eventDAO.getEventById(eventId).then((events) => events[0])
 }
 
 /**
@@ -297,4 +299,42 @@ export const getFuturePopularEvents = async (): Promise<EventWithId[]> => {
  */
 export const deleteUserEvents = async (userId: number): Promise<void> => {
   await eventDAO.deleteUserEvents(userId)
+}
+
+/**
+ * Function to check if a user can create an assistance for an event depending on
+ * the format and the maximum number of attendants of it.
+ * @param eventId - ID of an event.
+ * @returns {Promise<Boolean>} True if assistance can be created, false otherwise.
+ */
+export const canJoinEvent = async (eventId: number, assistanceFormat: AssistanceFormat): Promise<boolean> => {
+  // Get event by ID
+  const event = await getEventById(eventId)
+
+  // Get event format
+  let eventFormat: EventFormat = EventFormat.FACE_TO_FACE
+
+  switch ((event.format as any) as number) {
+    case 0:
+      eventFormat = EventFormat.FACE_TO_FACE
+      break
+    case 1:
+      eventFormat = EventFormat.ONLINE
+      break
+  }
+
+  // Check if event format is face-to-face
+  if (eventFormat === EventFormat.FACE_TO_FACE) {
+    // Check if user is trying to attend face-to-face to the event
+    if (assistanceFormat === AssistanceFormat.FACE_TO_FACE) {
+      // Get current number of face-to-face attendants
+      const currentAttendants = await getFaceToFaceEventAttendants(eventId)
+
+      // Check if there is still available space for another attendant
+      return currentAttendants < event.max_attendees
+    }
+  }
+
+  // Event is online or user is attending online
+  return true
 }

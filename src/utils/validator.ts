@@ -10,6 +10,7 @@ import { Message, MessageKey } from '../models/message/message'
 import { Assistance, AssistanceKey } from '../models/assistance/assistance'
 
 import { compareDates } from './dates'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 
 /**
  * Function that checks if a value is a {@link String}.
@@ -329,6 +330,9 @@ export const validateAssistance = (assistance: Assistance, areFieldsOptional: bo
   for (const [key, value] of Object.entries(assistance)) {
     // Fill the list of invalid fields if it is not valid for each value
     switch (key) {
+      case 'format':
+        if (!validateEnum(AssistanceFormat, value)) invalidFields.push(key)
+        break
       case 'comment':
         if (!validateString(value)) invalidFields.push(key)
         break
@@ -345,8 +349,13 @@ export const validateAssistance = (assistance: Assistance, areFieldsOptional: bo
       // Set field as an assistance property
       const property = field as AssistanceKey
 
-      // Check if value of the assistance property is fulfilled
-      return !(assistance[property] === undefined)
+      // Property format of an assistance is always required
+      if (property !== 'format') {
+        // Check if value of the assistance property is fulfilled
+        return !(assistance[property] === undefined)
+      } else {
+        return true
+      }
     })
   }
 

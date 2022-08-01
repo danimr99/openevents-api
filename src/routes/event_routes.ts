@@ -7,17 +7,18 @@ import { APIMessage } from '../models/enums/api_messages'
 import { DatabaseMessage } from '../models/enums/database_messages'
 
 import { authenticateJWT } from '../middlewares/jwt_authentication'
-import { parseAllEvent, parseEventId, parseEventSearch, parsePartialAssistance, parsePartialEvent, parseUserId } from '../middlewares/parser'
+import {
+  createPartialAssistance, deletePartialAssistance, editPartialAssistance,
+  parseAllEvent, parseEventId, parseEventSearch, parsePartialEvent, parseUserId
+} from '../middlewares/parser'
 
 import {
-  createEvent, deleteEvent, existsEventById, getAllEvents, getEventById, getEventsBySearch,
-  getFuturePopularEvents,
-  hasEventFinished,
-  isUserEventOwner, updateEventInformation
+  canJoinEvent, createEvent, deleteEvent, existsEventById, getAllEvents, getEventById, getEventsBySearch,
+  getFuturePopularEvents, hasEventFinished, isUserEventOwner, updateEventInformation
 } from '../controllers/event_controller'
 import {
-  createUserAssistanceForEvent, deleteUserAssistanceForEvent, existsAssistance, getEventAssistances, getUserAssistanceForEvent,
-  updateAssistance
+  createUserAssistanceForEvent, deleteUserAssistanceForEvent, existsAssistance, getEventAssistances,
+  getUserAssistanceForEvent, updateAssistance
 } from '../controllers/assistance_controller'
 import { existsUserById } from '../controllers/user_controller'
 
@@ -86,8 +87,7 @@ router.post('/', authenticateJWT, parseAllEvent, async (_req: Request, res: Resp
 })
 
 /**
- * Route that searches events with a title or location
- * matching the value of the query parameter.
+ * Route that gets future events ordered by DESC average score of the owner based on previously created finished events.
  * HTTP Method: GET
  * Endpoint: "/events/popular"
  */
@@ -166,15 +166,30 @@ router.get('/:event_id', authenticateJWT, parseEventId, async (_req: Request, re
     }
   }
 
-  // Get event by ID
-  await getEventById(eventId)
-    .then((event) => {
-      // Check if exists event by ID
-      if (event != null) {
-        // Send response
-        res.status(HttpStatusCode.OK).json(event)
+  // Check if exists event
+  await existsEventById(eventId)
+    .then(async (existsEvent) => {
+      if (existsEvent) {
+        // Event exists
+        // Get event
+        await getEventById(eventId)
+          .then((event) => {
+            // Send response
+            res.status(HttpStatusCode.OK).json(event)
+          }).catch((error) => {
+            // Add thrown error to stacktrace
+            stacktrace.error_sql = formatErrorSQL(error)
+
+            next(
+              new ErrorAPI(
+                DatabaseMessage.ERROR_SELECTING_EVENT_BY_ID,
+                HttpStatusCode.INTERNAL_SERVER_ERROR,
+                stacktrace
+              )
+            )
+          })
       } else {
-        // Event not found or does not exist
+        // Event does not exist
         next(
           new ErrorAPI(
             APIMessage.EVENT_NOT_FOUND,
@@ -189,7 +204,7 @@ router.get('/:event_id', authenticateJWT, parseEventId, async (_req: Request, re
 
       next(
         new ErrorAPI(
-          DatabaseMessage.ERROR_SELECTING_EVENT_BY_ID,
+          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
           HttpStatusCode.INTERNAL_SERVER_ERROR,
           stacktrace
         )
@@ -447,83 +462,120 @@ router.get('/:event_id/assistances', authenticateJWT, parseEventId, async (_req:
  * HTTP Method: POST
  * Endpoint: "/events/{event_id}/assistances"
  */
-router.post('/:event_id/assistances', authenticateJWT, parseEventId, async (_req: Request, res: Response, next: NextFunction) => {
+router.post('/:event_id/assistances', authenticateJWT, parseEventId, createPartialAssistance,
+  async (_req: Request, res: Response, next: NextFunction) => {
   // Get authenticated user ID
-  const userId: number = res.locals.JWT_USER_ID
+    const userId: number = res.locals.JWT_USER_ID
 
-  // Get event ID from the URL path sent as parameter
-  const eventId = res.locals.PARSED_EVENT_ID
+    // Get event ID from the URL path sent as parameter
+    const eventId = res.locals.PARSED_EVENT_ID
 
-  // Create stacktrace
-  const stacktrace: any = {
-    _original: {
-      user_id: userId,
-      event_id: eventId
+    // Get assistance from the request body
+    const assistance = res.locals.PARSED_ASSISTANCE
+
+    // Create stacktrace
+    const stacktrace: any = {
+      _original: {
+        user_id: userId,
+        event_id: eventId
+      }
     }
-  }
 
-  // Check if event exists
-  await existsEventById(eventId)
-    .then(async (existsEvent) => {
-      if (existsEvent) {
+    // Check if event exists
+    await existsEventById(eventId)
+      .then(async (existsEvent) => {
+        if (existsEvent) {
         // Event exists
-        await createUserAssistanceForEvent(userId, eventId)
-          .then((actionMessage) => {
-            // Get HTTP status code
-            let httpStatusCode: HttpStatusCode = HttpStatusCode.CREATED
+        // Check if event has not finished yet
+          await hasEventFinished(eventId)
+            .then(async (eventHasFinished) => {
+              if (!eventHasFinished) {
+              // Event has not finished yet
+              // Check if there is still available space for an attendant
+                await canJoinEvent(eventId, assistance.format)
+                  .then(async (canJoin) => {
+                    if (canJoin) {
+                    // Assistance can be created
+                    // Create assistance
+                      await createUserAssistanceForEvent(userId, eventId, assistance.format)
+                        .then((actionMessage) => {
+                        // Get HTTP status code
+                          let httpStatusCode: HttpStatusCode = HttpStatusCode.CREATED
 
-            if (actionMessage === APIMessage.ASSISTANCE_ALREADY_EXISTS) {
-              httpStatusCode = HttpStatusCode.OK
-            }
+                          if (actionMessage === APIMessage.ASSISTANCE_ALREADY_EXISTS) {
+                            httpStatusCode = HttpStatusCode.OK
+                          }
 
-            // Send response
-            res.status(httpStatusCode).json({
-              message: actionMessage,
-              stacktrace
+                          // Send response
+                          res.status(httpStatusCode).json({
+                            message: actionMessage,
+                            stacktrace
+                          })
+                        })
+                        .catch((error) => {
+                        // Add thrown error to stacktrace
+                          stacktrace.error_sql = formatErrorSQL(error)
+
+                          next(
+                            new ErrorAPI(
+                              DatabaseMessage.ERROR_INSERTING_ASSISTANCE,
+                              HttpStatusCode.INTERNAL_SERVER_ERROR,
+                              stacktrace
+                            )
+                          )
+                        })
+                    } else {
+                    // Assistance cannot be created
+                      next(
+                        new ErrorAPI(
+                          APIMessage.EVENT_REACHED_MAX_ATTENDANTS,
+                          HttpStatusCode.BAD_REQUEST,
+                          stacktrace
+                        )
+                      )
+                    }
+                  })
+              } else {
+              // Event has finished
+                next(
+                  new ErrorAPI(
+                    APIMessage.EVENT_FINISHED_ASSISTANCE,
+                    HttpStatusCode.BAD_REQUEST,
+                    stacktrace
+                  )
+                )
+              }
             })
-          })
-          .catch((error) => {
-            // Add thrown error to stacktrace
-            stacktrace.error_sql = formatErrorSQL(error)
-
-            next(
-              new ErrorAPI(
-                DatabaseMessage.ERROR_INSERTING_ASSISTANCE,
-                HttpStatusCode.INTERNAL_SERVER_ERROR,
-                stacktrace
-              )
-            )
-          })
-      } else {
+        } else {
         // Event does not exist
+          next(
+            new ErrorAPI(
+              APIMessage.EVENT_NOT_FOUND,
+              HttpStatusCode.NOT_FOUND,
+              stacktrace
+            )
+          )
+        }
+      }).catch((error) => {
+      // Add thrown error to stacktrace
+        stacktrace.error_sql = formatErrorSQL(error)
+
         next(
           new ErrorAPI(
-            APIMessage.EVENT_NOT_FOUND,
-            HttpStatusCode.NOT_FOUND,
+            DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
+            HttpStatusCode.INTERNAL_SERVER_ERROR,
             stacktrace
           )
         )
-      }
-    }).catch((error) => {
-      // Add thrown error to stacktrace
-      stacktrace.error_sql = formatErrorSQL(error)
-
-      next(
-        new ErrorAPI(
-          DatabaseMessage.ERROR_CHECKING_EVENT_BY_ID,
-          HttpStatusCode.INTERNAL_SERVER_ERROR,
-          stacktrace
-        )
-      )
-    })
-})
+      })
+  })
 
 /**
  * Route that edits an assistance of the authenticated user for the event with matching ID.
  * HTTP Method: PUT
  * Endpoint: "/events/{event_id}/assistances"
  */
-router.put('/:event_id/assistances', authenticateJWT, parseEventId, parsePartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
+router.put('/:event_id/assistances', authenticateJWT, parseEventId, editPartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
   // Get assistance from request body
   const assistance: Assistance = res.locals.PARSED_ASSISTANCE
 
@@ -568,7 +620,7 @@ router.put('/:event_id/assistances', authenticateJWT, parseEventId, parsePartial
                     // Event has not finished yet
                     next(
                       new ErrorAPI(
-                        APIMessage.EVENT_NOT_FINISHED,
+                        APIMessage.EVENT_NOT_FINISHED_ASSISTANCE,
                         HttpStatusCode.FORBIDDEN,
                         stacktrace
                       )
@@ -626,7 +678,7 @@ router.put('/:event_id/assistances', authenticateJWT, parseEventId, parsePartial
  * HTTP Method: DELETE
  * Endpoint: "/events/{event_id}/assistances"
  */
-router.delete('/:event_id/assistances', authenticateJWT, parseEventId, parsePartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
+router.delete('/:event_id/assistances', authenticateJWT, parseEventId, deletePartialAssistance, async (_req: Request, res: Response, next: NextFunction) => {
   // Get authenticated user ID
   const userId: number = res.locals.JWT_USER_ID
 

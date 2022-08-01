@@ -1,4 +1,5 @@
 import { Assistance } from '../models/assistance/assistance'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 
 import { databaseConnection } from '../utils/database'
 
@@ -54,11 +55,22 @@ export class AssistanceDAO {
    * @param {number} userId - ID of a user.
    * @param {number} eventId - ID of an event.
    */
-  async createUserAssistanceForEvent (userId: number, eventId: number): Promise<void> {
+  async createUserAssistanceForEvent (userId: number, eventId: number, format: AssistanceFormat): Promise<void> {
+    let assistanceFormat: number
+
+    // Get assistance format to insert
+    switch (format) {
+      case AssistanceFormat.FACE_TO_FACE:
+        assistanceFormat = 0
+        break
+      case AssistanceFormat.ONLINE:
+        assistanceFormat = 1
+    }
+
     // Create an assistance of a user for an event
     await databaseConnection.promise().query(
-      'INSERT INTO assistances (user_id, event_id) VALUES (?, ?)',
-      [userId, eventId]
+      'INSERT INTO assistances (user_id, event_id, format) VALUES (?, ?, ?)',
+      [userId, eventId, assistanceFormat]
     )
   }
 
@@ -112,5 +124,21 @@ export class AssistanceDAO {
       'DELETE FROM assistances WHERE user_id = ?',
       [userId]
     )
+  }
+
+  async getFaceToFaceEventAttendants (eventId: number): Promise<number> {
+    let result: any
+
+    // Query to database
+    return await databaseConnection.promise().query(
+      'SELECT COUNT(*) AS attendants FROM assistances WHERE event_id = ? AND format = 0',
+      [eventId]
+    ).then(([rows]) => {
+      // Get result
+      result = JSON.parse(JSON.stringify(rows))[0]
+
+      // Return result or 0 if null
+      return result.attendants === null ? 0 : result.attendants
+    })
   }
 }

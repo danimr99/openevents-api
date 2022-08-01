@@ -17,6 +17,7 @@ import {
   validateEventSearch, validateMessage, validateUser
 } from '../utils/validator'
 import { getCurrentDate } from '../utils/dates'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 
 /**
  * Middleware to parse all information fields of a {@link User}.
@@ -579,9 +580,46 @@ export const parseAllAssistance = (req: Request, res: Response, next: NextFuncti
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
-export const parsePartialAssistance = (req: Request, res: Response, next: NextFunction): void => {
-  // Set all user fields as optional
+export const createPartialAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all assistance fields as optional
   res.locals.optionalAssistanceFields = true
+
+  // Set assistance action
+  res.locals.assistanceAction = 'create'
+
+  return parseAssistance(req, res, next)
+}
+
+/**
+ * Middleware to parse optional information fields of an {@link Assistance}.
+ * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const editPartialAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all assistance fields as optional
+  res.locals.optionalAssistanceFields = true
+
+  // Set assistance action
+  res.locals.assistanceAction = 'edit'
+
+  return parseAssistance(req, res, next)
+}
+
+/**
+ * Middleware to parse optional information fields of an {@link Assistance}.
+ * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * @param {Request} req - Request object.
+ * @param {Response} res - Response object.
+ * @param {NextFunction} next - Next middleware.
+ */
+export const deletePartialAssistance = (req: Request, res: Response, next: NextFunction): void => {
+  // Set all assistance fields as optional
+  res.locals.optionalAssistanceFields = true
+
+  // Set assistance action
+  res.locals.assistanceAction = 'delete'
 
   return parseAssistance(req, res, next)
 }
@@ -589,9 +627,15 @@ export const parsePartialAssistance = (req: Request, res: Response, next: NextFu
 /**
  * Middleware to get and validate all the information required for an {@link Assistance}
  * from the request body in JSON format. If any assistance field validation is unsuccessful,
- * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
- * to determine whether fields of an {@link Assistance} are optional or required.
+ * an error is thrown to the error handler middleware.
+ *
+ * Uses a {@link Boolean} flag to determine whether fields of an {@link Assistance}
+ * are optional or required.
+ *
+ * User a {@link string} flag to determine whether assistance format field is required or optional.
+ *
  * @see res.locals.optionalAssistanceFields
+ * @see res.locals.assistanceAction
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -602,6 +646,9 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
 
   // Get event ID from the URL path sent as parameter
   const eventId = res.locals.PARSED_EVENT_ID
+
+  // Get assistance format from the request body
+  const format = req.body.format
 
   // Create a stacktrace
   let stacktrace: any = {}
@@ -621,17 +668,26 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
   const assistance: Assistance = {
     user_id: authenticatedUserId,
     event_id: eventId,
+    format: format,
     comment: req.body.comment,
     rating: req.body.rating
   }
 
-  // Add received message data to stacktrace
+  // Add received assistance data to stacktrace
   stacktrace = {
     _original: assistance
   }
 
   // Validate assistance data
-  const invalidFields: string[] = validateAssistance(assistance, res.locals.optionalAssistanceFields)
+  let invalidFields: string[] = validateAssistance(assistance, res.locals.optionalAssistanceFields)
+
+  // Get assistance action
+  const assistanceAction: string = res.locals.assistanceAction
+
+  // Format field is only required on create an assistance
+  invalidFields = invalidFields.filter(field => {
+    return assistanceAction === 'create' && field === 'format'
+  })
 
   // Check if exists invalid fields
   if (invalidFields.length > 0) {
@@ -639,7 +695,13 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
+      // Get list of valid assistance formats
+      const formats = Object.values(AssistanceFormat).map((format) => format).toString()
+
       switch (field) {
+        case 'format':
+          message = `${APIMessage.ERROR_INVALID_ENUM_FIELD} ${formats}`
+          break
         case 'comment':
           message = APIMessage.ERROR_INVALID_STRING_FIELD
           break

@@ -1,4 +1,5 @@
 import { Assistance } from '../models/assistance/assistance'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 import { APIMessage } from '../models/enums/api_messages'
 
 import { AssistanceDAO } from '../dao/assistance_dao'
@@ -63,7 +64,7 @@ export const getEventAssistances = async (eventId: number): Promise<Assistance[]
  * @param eventId - ID of an event.
  * @returns {Promise<string>} Notification informing the result of the operation.
  */
-export const createUserAssistanceForEvent = async (userId: number, eventId: number): Promise<string> => {
+export const createUserAssistanceForEvent = async (userId: number, eventId: number, assistanceFormat: AssistanceFormat): Promise<string> => {
   // Check if already exists an assistance of a user for an event
   return await existsAssistance(userId, eventId)
     .then(async (existsAssistance) => {
@@ -72,7 +73,7 @@ export const createUserAssistanceForEvent = async (userId: number, eventId: numb
         return APIMessage.ASSISTANCE_ALREADY_EXISTS
       } else {
         // Assistance does not exist
-        return await assistanceDAO.createUserAssistanceForEvent(userId, eventId)
+        return await assistanceDAO.createUserAssistanceForEvent(userId, eventId, assistanceFormat)
           .then(() => APIMessage.ASSISTANCE_CREATED)
       }
     })
@@ -134,4 +135,13 @@ export const deleteAssistancesOfEvent = async (eventId: number): Promise<void> =
  */
 export const deleteUserAssistances = async (userId: number): Promise<void> => {
   await assistanceDAO.deleteUserAssistances(userId)
+}
+
+/**
+ * Function to get the number of current face-to-face attendants of an event.
+ * @param eventId - ID of an event.
+ * @returns {Promise<number>} Number of face-to-face attendants of an event.
+ */
+export const getFaceToFaceEventAttendants = async (eventId: number): Promise<number> => {
+  return await assistanceDAO.getFaceToFaceEventAttendants(eventId)
 }

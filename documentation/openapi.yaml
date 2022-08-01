@@ -661,6 +661,13 @@ paths:
             type: integer
           required: true
           description: ID of the event
+      requestBody:
+        description: Event information in JSON format.
+        required: true
+        content:
+          application/json:
+            schema:
+               $ref: '#/components/schemas/RequestCreateAssistance'
       responses:
         "200":
           description: Already exists an assistance of the user for the event.
@@ -685,7 +692,8 @@ paths:
                   stacktrace:
                     type: object
         "400":
-          description: Invalid event ID.
+          description: Invalid event ID, user is trying to join a finished event or event has reached the
+            maximum number of attendants.
         "404":
           description: Event does not exist or was not found.
     put:
@@ -708,7 +716,7 @@ paths:
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestAssistance'
+               $ref: '#/components/schemas/RequestEditAssistance'
       responses:
         "200":
           description: Assistance edited.
@@ -1337,7 +1345,14 @@ components:
           timestamp:
             type: string
             example: "2022-07-24T12:18:11.470Z"
-    RequestAssistance:
+    RequestCreateAssistance:
+      type: object
+      properties:
+        format:
+          type: string
+          example: "Online"
+          description: Attending format of a user to an event. 
+    RequestEditAssistance:
       type: object
       properties:
         comment:
