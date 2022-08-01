@@ -101,4 +101,16 @@ export class AssistanceDAO {
       [eventId]
     )
   }
+
+  /**
+   * Function to delete all assistances of a user from the database.
+   * @param userId - ID of a user.
+   */
+  async deleteUserAssistances (userId: number): Promise<void> {
+    // Delete assistances of a user
+    await databaseConnection.promise().query(
+      'DELETE FROM assistances WHERE user_id = ?',
+      [userId]
+    )
+  }
 }

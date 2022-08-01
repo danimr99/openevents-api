@@ -358,4 +358,17 @@ export class EventDAO {
 
     return popularEvents
   }
+
+  /**
+   * Function to delete all events created by a user
+   * from the database.
+   * @param {number} userId - ID of a user.
+   */
+  async deleteUserEvents (userId: number): Promise<void> {
+    // Delete events of an owner
+    await databaseConnection.promise().query(
+      'DELETE FROM events WHERE owner_id = ?',
+      [userId]
+    )
+  }
 }

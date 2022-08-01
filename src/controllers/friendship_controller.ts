@@ -149,3 +149,11 @@ export const deleteFriendRequest = async (userId: number, externalUserId: number
       }
     })
 }
+
+/**
+ * Function to delete all friendships of a user.
+ * @param {number} userId - ID of a user.
+ */
+export const deleteUserFriendships = async (userId: number): Promise<void> => {
+  await friendshipDAO.deleteUserFriendships(userId)
+}

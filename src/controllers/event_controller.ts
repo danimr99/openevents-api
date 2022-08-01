@@ -290,3 +290,11 @@ export const getAverageRatingOfEventsCreatedByUser = async (userId: number): Pro
 export const getFuturePopularEvents = async (): Promise<EventWithId[]> => {
   return await eventDAO.getFuturePopularEvents()
 }
+
+/**
+ * Function to delete all events created by a user.
+ * @param {number} userId - ID of a user.
+ */
+export const deleteUserEvents = async (userId: number): Promise<void> => {
+  await eventDAO.deleteUserEvents(userId)
+}

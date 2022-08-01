@@ -97,4 +97,16 @@ export class FriendshipDAO {
       [userId, externalUserId, externalUserId, userId]
     )
   }
+
+  /**
+   * Function to delete all friendships of a user from the database.
+   * @param {number} userId - ID of a user.
+   */
+  async deleteUserFriendships (userId: number): Promise<void> {
+    // Delete all friendships of a user
+    await databaseConnection.promise().query(
+      'DELETE FROM friendships WHERE user_id = ? OR friend_user_id = ?',
+      [userId, userId]
+    )
+  }
 }

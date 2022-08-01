@@ -3,9 +3,10 @@ import { UserStatistics } from '../models/user/user_statistics'
 
 import { UserDAO } from '../dao/user_dao'
 
-import { getAverageRatingOfEventsCreatedByUser, getEventsByOwnerId } from './event_controller'
-import { getFriends, getFriendshipRequests } from './friendship_controller'
-import { getAssistancesByUser } from './assistance_controller'
+import { deleteUserEvents, getAverageRatingOfEventsCreatedByUser, getEventsByOwnerId } from './event_controller'
+import { deleteUserFriendships, getFriends, getFriendshipRequests } from './friendship_controller'
+import { deleteUserAssistances, getAssistancesByUser } from './assistance_controller'
+import { deleteUserMessages } from './message_controller'
 
 import { isNumber, isObject, validateString, validateUser } from '../utils/validator'
 import { encryptPassword } from '../utils/cypher'
@@ -149,14 +150,23 @@ export const updateUserInformation = async (id: number, user: User): Promise<Use
 
 /**
  * Function to delete a user and all the information related with it.
- * @param {number} id - ID of the user to delete.
+ * @param {number} userId - ID of a user to delete.
  */
-export const deleteUser = async (id: number): Promise<void> => {
-  await userDAO.deleteUserById(id)
-  // TODO: Delete all events where the delete user is the owner
-  // TODO: Delete all assistances created by the deleted user
-  // TODO: Delete all the friendships related with the deleted user
-  // TODO: Delete all the messages sent and received by the deleted user
+export const deleteUser = async (userId: number): Promise<void> => {
+  // Delete user
+  await userDAO.deleteUserById(userId)
+
+  // Delete all events where the delete user is the owner
+  await deleteUserEvents(userId)
+
+  // Delete all assistances created by the deleted user
+  await deleteUserAssistances(userId)
+
+  // Delete all the friendships related with the deleted user
+  await deleteUserFriendships(userId)
+
+  // Delete all the messages sent and received by the deleted user
+  await deleteUserMessages(userId)
 }
 
 /**

@@ -40,3 +40,11 @@ export const getChat = async (userId: number, externalUserId: number): Promise<M
 export const deleteChat = async (userId: number, externalUserId: number): Promise<void> => {
   await messageDAO.deleteChat(userId, externalUserId)
 }
+
+/**
+ * Function to delete all messages of a user.
+ * @param userId - ID of a user.
+ */
+export const deleteUserMessages = async (userId: number): Promise<void> => {
+  await messageDAO.deleteUserMessages(userId)
+}

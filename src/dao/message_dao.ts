@@ -66,4 +66,16 @@ export class MessageDAO {
       [userId, externalUserId, externalUserId, userId]
     )
   }
+
+  /**
+   * Function to delete all messages of a user from the database.
+   * @param userId - ID of a user.
+   */
+  async deleteUserMessages (userId: number): Promise<void> {
+    // Delete all messages of a user
+    await databaseConnection.promise().query(
+      'DELETE FROM messages WHERE sender_user_id = ? OR receiver_user_id = ?',
+      [userId, userId]
+    )
+  }
 }

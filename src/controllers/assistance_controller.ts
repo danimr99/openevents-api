@@ -127,3 +127,11 @@ export const getAssistancesByUser = async (userId: number): Promise<Assistance[]
 export const deleteAssistancesOfEvent = async (eventId: number): Promise<void> => {
   await assistanceDAO.deleteAssistancesOfEvent(eventId)
 }
+
+/**
+ * Function to delete all assistances of a user.
+ * @param {number} userId - ID of a user.
+ */
+export const deleteUserAssistances = async (userId: number): Promise<void> => {
+  await assistanceDAO.deleteUserAssistances(userId)
+}
