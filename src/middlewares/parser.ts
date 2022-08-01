@@ -8,6 +8,7 @@ import { EventFormat } from '../models/event/event_format'
 import { EventCategory } from '../models/event/event_category'
 import { Message } from '../models/message/message'
 import { Assistance } from '../models/assistance/assistance'
+import { AssistanceFormat } from '../models/assistance/assistance_format'
 import { HttpStatusCode } from '../models/enums/http_status_code'
 import { ErrorAPI } from '../models/error/error_api'
 import { APIMessage } from '../models/enums/api_messages'
@@ -17,11 +18,10 @@ import {
   validateEventSearch, validateMessage, validateUser
 } from '../utils/validator'
 import { getCurrentDate } from '../utils/dates'
-import { AssistanceFormat } from '../models/assistance/assistance_format'
 
 /**
- * Middleware to parse all information fields of a {@link User}.
- * Uses {@link parseUser} to get a {@link User} from a request body and validate it.
+ * Middleware to parse all information fields of a user.
+ * Uses {@link parseUser} to get a user from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -34,8 +34,8 @@ export const parseAllUser = (req: Request, res: Response, next: NextFunction): v
 }
 
 /**
- * Middleware to parse optional information fields of a {@link User}.
- * Uses {@link parseUser} to get a {@link User} from a request body and validate it.
+ * Middleware to parse optional information fields of a user.
+ * Uses {@link parseUser} to get a user from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -48,11 +48,14 @@ export const parsePartialUser = (req: Request, res: Response, next: NextFunction
 }
 
 /**
- * Middleware to get and validate all the information required for a {@link User}
+ * Middleware to get and validate all the information required for a user
  * from the request body in JSON format. If any user field validation is unsuccessful,
- * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
- * to determine whether fields of a {@link User} are optional or required.
+ * an error is thrown to the error handler middleware.
+ *
+ * Uses a {@link Boolean} flag to determine whether fields of a user
+ * are optional or required.
  * @see res.locals.optionalUserFields
+ *
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -126,7 +129,7 @@ const parseUser = (req: Request, res: Response, next: NextFunction): void => {
 }
 
 /**
- * Middleware to get and validate credentials required for a {@link User} to login
+ * Middleware to get and validate credentials required for a user to login
  * from the request body in JSON format. If any credential field validation is unsuccessful,
  * an error is thrown to the error handler middleware.
  * @param {Request} req - Request object.
@@ -158,7 +161,7 @@ export const parseCredentials = (req: Request, res: Response, next: NextFunction
     _original: credentials
   }
 
-  // Validate user data
+  // Validate credentials
   const invalidFields: string[] = validateCredentials(credentials)
 
   // Check if exists invalid fields
@@ -194,7 +197,7 @@ export const parseCredentials = (req: Request, res: Response, next: NextFunction
 }
 
 /**
- * Middleware to get and validate a {@link User} ID from the URL path as a parameter.
+ * Middleware to get and validate a user ID from the URL path as a parameter.
  * If the ID is not a number, an error is thrown to the error handler middleware.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
@@ -231,39 +234,42 @@ export const parseUserId = (req: Request, res: Response, next: NextFunction): vo
 }
 
 /**
- * Middleware to parse all information fields of an {@link Event}.
- * Uses {@link parseEvent} to get an {@link Event} from a request body and validate it.
+ * Middleware to parse all information fields of an event.
+ * Uses {@link parseEvent} to get an event from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
 export const parseAllEvent = (req: Request, res: Response, next: NextFunction): void => {
-  // Set all user fields as required
+  // Set all event fields as required
   res.locals.optionalEventFields = false
 
   return parseEvent(req, res, next)
 }
 
 /**
- * Middleware to parse optional information fields of an {@link Event}.
- * Uses {@link parseEvent} to get an {@link Event} from a request body and validate it.
+ * Middleware to parse optional information fields of an event.
+ * Uses {@link parseEvent} to get an event from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
  */
 export const parsePartialEvent = (req: Request, res: Response, next: NextFunction): void => {
-  // Set all user fields as optional
+  // Set all event fields as optional
   res.locals.optionalEventFields = true
 
   return parseEvent(req, res, next)
 }
 
 /**
- * Middleware to get and validate all the information required for an {@link Event}
+ * Middleware to get and validate all the information required for an event
  * from the request body in JSON format. If any event field validation is unsuccessful,
- * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
- * to determine whether fields of an {@link Event} are optional or required.
+ * an error is thrown to the error handler middleware.
+ *
+ * Uses a {@link Boolean} flag to determine whether fields of an event are
+ * optional or required.
  * @see res.locals.optionalEventFields
+ *
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -286,7 +292,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     )
   }
 
-  // Get all user data from request body
+  // Get all event data from request body
   const event: Event = {
     title: req.body.title,
     owner_id: authenticatedUserId,
@@ -317,7 +323,10 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
+      // Get list of valid event formats
       const formats = Object.values(EventFormat).map((format) => format).toString()
+
+      // Get list of valid event categories
       const categories = Object.values(EventCategory).map((category) => category).toString()
 
       switch (field) {
@@ -364,7 +373,7 @@ const parseEvent = (req: Request, res: Response, next: NextFunction): void => {
 }
 
 /**
- * Middleware to get and validate an {@link Event} ID from the URL path as a parameter.
+ * Middleware to get and validate an event ID from the URL path as a parameter.
  * If the ID is not a number, an error is thrown to the error handler middleware.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
@@ -425,7 +434,7 @@ export const parseEventSearch = (req: Request, res: Response, next: NextFunction
 
   // Check if exists invalid fields
   if (invalidFields.length > 0) {
-    // Add each invalid user field to stacktrace
+    // Add each invalid search field to stacktrace
     stacktrace.invalid_fields = invalidFields.map(field => {
       let message
 
@@ -455,8 +464,8 @@ export const parseEventSearch = (req: Request, res: Response, next: NextFunction
 }
 
 /**
- * Middleware to parse all information fields of a {@link Message}.
- * Uses {@link parseMessage} to get a {@link Message} from a request body and validate it.
+ * Middleware to parse all information fields of a message.
+ * Uses {@link parseMessage} to get a message from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -469,8 +478,8 @@ export const parseAllMessage = (req: Request, res: Response, next: NextFunction)
 }
 
 /**
- * Middleware to parse optional information fields of a {@link Message}.
- * Uses {@link parseMessage} to get a {@link Message} from a request body and validate it.
+ * Middleware to parse optional information fields of a message.
+ * Uses {@link parseMessage} to get a message from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -483,11 +492,14 @@ export const parsePartialMessage = (req: Request, res: Response, next: NextFunct
 }
 
 /**
- * Middleware to get and validate all the information required for a {@link Message}
+ * Middleware to get and validate all the information required for a message
  * from the request body in JSON format. If any message field validation is unsuccessful,
- * an error is thrown to the error handler middleware. Uses a {@link Boolean} flag
- * to determine whether fields of a {@link Message} are optional or required.
+ * an error is thrown to the error handler middleware.
+ *
+ * Uses a {@link Boolean} flag to determine whether fields of a message are
+ * optional or required.
  * @see res.locals.optionalMessageFields
+ *
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -560,8 +572,8 @@ const parseMessage = (req: Request, res: Response, next: NextFunction): void => 
 }
 
 /**
- * Middleware to parse all information fields of an {@link Assistance}.
- * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * Middleware to parse all information fields of an assistance.
+ * Uses {@link parseAssistance} to get an assistance from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -574,8 +586,8 @@ export const parseAllAssistance = (req: Request, res: Response, next: NextFuncti
 }
 
 /**
- * Middleware to parse optional information fields of an {@link Assistance}.
- * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * Middleware to parse optional information fields of an assistance.
+ * Uses {@link parseAssistance} to get an assistance from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -591,8 +603,8 @@ export const createPartialAssistance = (req: Request, res: Response, next: NextF
 }
 
 /**
- * Middleware to parse optional information fields of an {@link Assistance}.
- * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * Middleware to parse optional information fields of an assistance.
+ * Uses {@link parseAssistance} to get an assistance from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -608,8 +620,8 @@ export const editPartialAssistance = (req: Request, res: Response, next: NextFun
 }
 
 /**
- * Middleware to parse optional information fields of an {@link Assistance}.
- * Uses {@link parseAssistance} to get an {@link Assistance} from a request body and validate it.
+ * Middleware to parse optional information fields of an assistance.
+ * Uses {@link parseAssistance} to get an assistance from a request body and validate it.
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -625,17 +637,17 @@ export const deletePartialAssistance = (req: Request, res: Response, next: NextF
 }
 
 /**
- * Middleware to get and validate all the information required for an {@link Assistance}
+ * Middleware to get and validate all the information required for an assistance
  * from the request body in JSON format. If any assistance field validation is unsuccessful,
  * an error is thrown to the error handler middleware.
  *
- * Uses a {@link Boolean} flag to determine whether fields of an {@link Assistance}
+ * Uses a {@link Boolean} flag to determine whether fields of an assistance
  * are optional or required.
- *
- * User a {@link string} flag to determine whether assistance format field is required or optional.
- *
  * @see res.locals.optionalAssistanceFields
+ *
+ * Uses a {@link string} flag to determine whether assistance format field is required or optional.
  * @see res.locals.assistanceAction
+ *
  * @param {Request} req - Request object.
  * @param {Response} res - Response object.
  * @param {NextFunction} next - Next middleware.
@@ -646,9 +658,6 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
 
   // Get event ID from the URL path sent as parameter
   const eventId = res.locals.PARSED_EVENT_ID
-
-  // Get assistance format from the request body
-  const format = req.body.format
 
   // Create a stacktrace
   let stacktrace: any = {}
@@ -668,7 +677,7 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
   const assistance: Assistance = {
     user_id: authenticatedUserId,
     event_id: eventId,
-    format: format,
+    format: req.body.format,
     comment: req.body.comment,
     rating: req.body.rating
   }
@@ -721,7 +730,7 @@ const parseAssistance = (req: Request, res: Response, next: NextFunction): void 
       )
     )
   } else {
-    // Pass validated message to the next middleware
+    // Pass validated assistance to the next middleware
     res.locals.PARSED_ASSISTANCE = assistance
     next()
   }
