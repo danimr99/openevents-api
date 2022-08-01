@@ -105,6 +105,8 @@ Go to the project directory
   cd openevents-api
 ```
 
+Configure database using <a href="https://github.com/danimr99/openevents-api/blob/main/database/openevents.sql">SQL code</a>
+
 Install dependencies
 
 ```bash
