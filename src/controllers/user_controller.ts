@@ -27,7 +27,7 @@ export const getUsersByEmail = async (email: string = ''): Promise<UserWithId[]>
  * @returns {Promise<UserWithId>} User with matching ID.
  */
 export const getUserById = async (id: number): Promise<UserWithId> => {
-  return await userDAO.getUserById(id)
+  return await userDAO.getUserById(id).then((users) => users[0])
 }
 
 /**
