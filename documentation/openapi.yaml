@@ -1,4 +1,4 @@
-openapi: '3.0.3'
+openapi: 3.0.3
 info:
   title: OpenEvents
   description: An Express API for OpenEvents
@@ -10,15 +10,17 @@ info:
     url: https://www.mit.edu/~amini/LICENSE.md
   version: 1.0.0
 servers:
-- url: http://localhost:3000/
-  description: Development
+  - url: http://localhost:3000
+    description: Development
 paths:
   /users:
     post:
       tags:
-      - Users
+        - Users
       summary: Creates a user.
-      description: Inserts into database the user received from the request body in JSON format.
+      description: >-
+        Inserts into database the user received from the request body in JSON
+        format.
       security: []
       requestBody:
         description: User information in JSON format.
@@ -26,25 +28,28 @@ paths:
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestUser'
+              $ref: '#/components/schemas/RequestUser'
       responses:
-        "201":
+        '201':
           description: User created.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseUser'
-        "400":
-          description: Already exists a user with the same email address as the specified or any of the user fields is missing or does not meet the requirements to be considered as valid.
+        '400':
+          description: >-
+            Already exists a user with the same email address as the specified
+            or any of the user fields is missing or does not meet the
+            requirements to be considered as valid.
     get:
       tags:
-      - Users
+        - Users
       summary: Gets all users.
       description: Gets all users from the database without their password.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of all users.
           content:
             application/json:
@@ -57,14 +62,16 @@ paths:
       security:
         - BearerAuth: []
       requestBody:
-        description: User information in JSON format. Only the fields to be updated are required.
+        description: >-
+          User information in JSON format. Only the fields to be updated are
+          required.
         required: true
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestUser'
+              $ref: '#/components/schemas/RequestUser'
       responses:
-        "200":
+        '200':
           description: User with the updated information.
           content:
             application/json:
@@ -74,13 +81,15 @@ paths:
       tags:
         - Users
       summary: Deletes the authenticated user and all the information related with it.
-      description: Besides deleting the user, it also deletes all the events where the user is the owner,
-        all the assistances created by the user, all the friendships where the deleted user is related and all
-        the messages sent or received by the user to delete.
+      description: >-
+        Besides deleting the user, it also deletes all the events where the user
+        is the owner, all the assistances created by the user, all the
+        friendships where the deleted user is related and all the messages sent
+        or received by the user to delete.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: User and all the information related to it deleted successfully.
           content:
             application/json:
@@ -89,105 +98,110 @@ paths:
                 properties:
                   message:
                     type: string
-                    description: Message notifying that the action has been completed successfully.
-                    example: "User was deleted successfully"
-
+                    description: >-
+                      Message notifying that the action has been completed
+                      successfully.
+                    example: User was deleted successfully
   /users/login:
-        post:
-          tags:
-          - Users
-          summary: Authenticates a user.
-          description: Checks whether credentials are valid or not. If credentials are valid, generates an authentication token.
-          security: []
-          requestBody:
-            description: Email address and password of the user to be authenticated in JSON format.
-            required: true
-            content:
-              application/json:
-                schema:
-                  type: object
-                  items:
-                    required: 
-                      - email
-                      - password
-                  properties:
-                    email:
-                      description: The email address to assign to the user
-                      type: string
-                      example: "janedoe@openevents.com"
-                    password:
-                      description: The password to assign to the user
-                      type: string
-                      example: "password"
-          responses:
-            "200":
-              description: User authenticated.
-              content:
-                application/json:
-                  schema:
-                    type: object
-                    items:
-                      required:
-                      - bearer_token
-                    properties:
-                      bearer_token:
-                        type: string
-                        example: "eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4"
-            "400":
-              description: Invalid credentials or any of the credentials fields is missing or does not meet the requirements to be considered as valid.
-              
+    post:
+      tags:
+        - Users
+      summary: Authenticates a user.
+      description: >-
+        Checks whether credentials are valid or not. If credentials are valid,
+        generates an authentication token.
+      security: []
+      requestBody:
+        description: >-
+          Email address and password of the user to be authenticated in JSON
+          format.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              items:
+                required:
+                  - email
+                  - password
+              properties:
+                email:
+                  description: The email address to assign to the user
+                  type: string
+                  example: janedoe@openevents.com
+                password:
+                  description: The password to assign to the user
+                  type: string
+                  example: password
+      responses:
+        '200':
+          description: User authenticated.
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  required:
+                    - bearer_token
+                properties:
+                  bearer_token:
+                    type: string
+                    example: >-
+                      eyJhbGciOiJIUzI1NiJ9.VyaWEiLCJsYXN0X25hbWUiOiJHVyaWEiLCJsYXN0X25hbWUiOJHdWFyZGlhIiwiZW1haWwiOiJudXJpYUBvcGVuZXZlbnRzLmNvbSIsImltYWdlIjoiaHR0cHM6Ly93d3cuY2xldmVyZmlsZXMuY29tL2hvd3RvL3dwLWNvbnRlbnQvdXBsb2Fkcy8yMDE4LzAzL21pbmlvbi5qcGcifQ.HrfvFg8FhyRe1f-gmTdHvdWFyZGlhIiwiZW1haWwPvL_aP4
+        '400':
+          description: >-
+            Invalid credentials or any of the credentials fields is missing or
+            does not meet the requirements to be considered as valid.
   /users/{user_id}:
-      get:
-        tags:
-          - Users
-        summary: Gets a user by ID.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the user to get
-        responses:
-          "200":
-              description: User matching with the specified ID.
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/ResponseUserWithId'
-          "400":
-            description: Invalid user ID.
-          "404":
-            description: User does not exist or was not found.
-
+    get:
+      tags:
+        - Users
+      summary: Gets a user by ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user to get
+      responses:
+        '200':
+          description: User matching with the specified ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseUserWithId'
+        '400':
+          description: Invalid user ID.
+        '404':
+          description: User does not exist or was not found.
   /users/{user_id}/friends:
-      get:
-        tags:
-          - Users
-        summary: Gets all friends of a user.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the user
-        responses:
-          "200":
-              description: List of friends of the user matching ID.
-              content:
-                application/json:
-                  schema:
-                    $ref: '#/components/schemas/ResponseListUserWithId'  
-          "400":
-            description: Invalid user ID.
-          "404":
-            description: User does not exist or was not found.
-
+    get:
+      tags:
+        - Users
+      summary: Gets all friends of a user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: List of friends of the user matching ID.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListUserWithId'
+        '400':
+          description: Invalid user ID.
+        '404':
+          description: User does not exist or was not found.
   /users/{user_id}/events:
     get:
       tags:
@@ -203,17 +217,16 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of events created by the specified user.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithId'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithId'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-          
   /users/{user_id}/statistics:
     get:
       tags:
@@ -229,17 +242,16 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: User statistics.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseUserStatistics'   
-        "400":
+                $ref: '#/components/schemas/ResponseUserStatistics'
+        '400':
           description: Invalid user ID.
-        "404":
-          description: User does not exist or was not found.        
-
+        '404':
+          description: User does not exist or was not found.
   /users/{user_id}/events/future:
     get:
       tags:
@@ -255,17 +267,16 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of future events created by the specified user.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithId'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithId'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/events/finished:
     get:
       tags:
@@ -281,17 +292,16 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of finished events created by the specified user.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithId'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithId'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/events/active:
     get:
       tags:
@@ -307,23 +317,24 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of active events created by the specified user.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithId'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithId'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/assistances:
     get:
       tags:
         - Users
       summary: Gets all events with an assistance of a user with matching ID.
-      description: Gets all events where a user is an attendant along with the comments and ratings given to them by the user.
+      description: >-
+        Gets all events where a user is an attendant along with the comments and
+        ratings given to them by the user.
       security:
         - BearerAuth: []
       parameters:
@@ -334,23 +345,24 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of events where a user is an attendant.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/assistances/future:
     get:
       tags:
         - Users
       summary: Gets all future events with an assistance of a user with matching ID.
-      description: Gets all future events where a user is an attendant along with the comments and ratings given to them by the user.
+      description: >-
+        Gets all future events where a user is an attendant along with the
+        comments and ratings given to them by the user.
       security:
         - BearerAuth: []
       parameters:
@@ -361,23 +373,24 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of future events where a user is an attendant.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/assistances/finished:
     get:
       tags:
         - Users
       summary: Gets all finished events with an assistance of a user with matching ID.
-      description: Gets all finished events where a user is an attendant along with the comments and ratings given to them by the user.
+      description: >-
+        Gets all finished events where a user is an attendant along with the
+        comments and ratings given to them by the user.
       security:
         - BearerAuth: []
       parameters:
@@ -388,78 +401,83 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: List of finished events where a user is an attendant.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
-        "400":
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'
+        '400':
           description: Invalid user ID.
-        "404":
+        '404':
           description: User does not exist or was not found.
-
   /users/{user_id}/assistances/active:
-      get:
-        tags:
-          - Users
-        summary: Gets all active events with an assistance of a user with matching ID.
-        description: Gets all active events where a user is an attendant along with the comments and ratings given to them by the user.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the user
-        responses:
-          "200":
-            description: List of active events where a user is an attendant.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'   
-          "400":
-            description: Invalid user ID.
-          "404":
-            description: User does not exist or was not found.
-
+    get:
+      tags:
+        - Users
+      summary: Gets all active events with an assistance of a user with matching ID.
+      description: >-
+        Gets all active events where a user is an attendant along with the
+        comments and ratings given to them by the user.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+      responses:
+        '200':
+          description: List of active events where a user is an attendant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseListEventWithIdAndAssistance'
+        '400':
+          description: Invalid user ID.
+        '404':
+          description: User does not exist or was not found.
   /users/search:
     get:
       tags:
         - Users
-      summary: Searches users with a name, last name or email matching the value of the query parameter.
+      summary: >-
+        Searches users with a name, last name or email matching the value of the
+        query parameter.
       security:
-          - BearerAuth: []
+        - BearerAuth: []
       parameters:
-          - in: query
-            name: text
-            schema:
-              type: string
-            required: true
-            description: Text to search on the name, last name or email fields of a user to match.
+        - in: query
+          name: text
+          schema:
+            type: string
+          required: true
+          description: >-
+            Text to search on the name, last name or email fields of a user to
+            match.
       responses:
-        "200":
-          description: List of users that match with the text on their name, last name or email field.
+        '200':
+          description: >-
+            List of users that match with the text on their name, last name or
+            email field.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
-        "400":
+        '400':
           description: No text introduced.
-        
   /events:
     get:
       tags:
         - Events
       summary: Gets all future events.
-      description: Gets all the events whose start date is greater than now. 
+      description: Gets all the events whose start date is greater than now.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of future events.
           content:
             application/json:
@@ -469,9 +487,11 @@ paths:
       tags:
         - Events
       summary: Creates an event.
-      description: Depending on some parameters, there are fields that can be optional. 
-        If an event is online, the link is required and the location and the max_attendees are optional.
-        If an event is face-to-face, the link is optional and the location and the max_attendees are required.
+      description: >-
+        Depending on some parameters, there are fields that can be optional. If
+        an event is online, the link is required and the location and the
+        max_attendees are optional. If an event is face-to-face, the link is
+        optional and the location and the max_attendees are required.
       security:
         - BearerAuth: []
       requestBody:
@@ -480,149 +500,157 @@ paths:
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestEvent'
+              $ref: '#/components/schemas/RequestEvent'
       responses:
-        "201":
+        '201':
           description: Created event.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseEventWithId'
-
   /events/popular:
     get:
       tags:
         - Events
       summary: Gets all future popular events.
-      description: Gets all the events whose start date is greater than now ordered by the average user rating in DESC order. It will only show events of those
+      description: >-
+        Gets all the events whose start date is greater than now ordered by the
+        average user rating in DESC order. It will only show events of those
         owners that have received a rating on finished events.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of future popular events.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListEventWithId'
-
   /events/search:
     get:
       tags:
         - Events
-      summary: Searches events with a title and/or location matching the value of the queries parameters.
+      summary: >-
+        Searches events with a title and/or location matching the value of the
+        queries parameters.
       security:
-          - BearerAuth: []
+        - BearerAuth: []
       parameters:
-          - in: query
-            name: title
-            schema:
-              type: string
-            required: false
-            description: Title to search.
-          - in: query
-            name: location
-            schema:
-              type: string
-            required: false
-            description: Location to search.
+        - in: query
+          name: title
+          schema:
+            type: string
+          required: false
+          description: Title to search.
+        - in: query
+          name: location
+          schema:
+            type: string
+          required: false
+          description: Location to search.
       responses:
-        "200":
+        '200':
           description: List of events that match with the title and/or location queried.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListEventWithId'
-        "400":
+        '400':
           description: Invalid title and/or location.
-
   /events/{event_id}:
-      get:
-        tags:
-          - Events
-        summary: Gets an event by ID.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: event_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the event to get
-        responses:
-          "200":
-            description: Event matching with the specified ID.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResponseEventWithId'
-          "404":
-            description: Event does not exist or was not found.
-      put:
-        tags:
-          - Events
-        summary: Edits specified fields of an event if the authenticated user is the owner of the event.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: event_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the event to edit 
-        requestBody:
-          description: Event information in JSON format. Only the fields to be updated are required.
+    get:
+      tags:
+        - Events
+      summary: Gets an event by ID.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
           required: true
+          description: ID of the event to get
+      responses:
+        '200':
+          description: Event matching with the specified ID.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RequestEvent'
-        responses:
-          "200":
-            description: Event with the updated information.
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/ResponseEventWithId'
-          "400":
-            description: Any of the specified event fields to modify are not valid.
-          "403":
-            description: Authenticated user trying to modify the specified event is not the owner of it.
-          "404":
-            description: Event does not exist or was not found.
-      delete:
-        tags:
-          - Events
-        summary: Deletes an event with matching ID.
-        description: Deletes an event by ID if the authenticated user is the owner of it.
-        security:
-          - BearerAuth: []
-        parameters:
-          - in: path
-            name: event_id
+                $ref: '#/components/schemas/ResponseEventWithId'
+        '404':
+          description: Event does not exist or was not found.
+    put:
+      tags:
+        - Events
+      summary: >-
+        Edits specified fields of an event if the authenticated user is the
+        owner of the event.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event to edit
+      requestBody:
+        description: >-
+          Event information in JSON format. Only the fields to be updated are
+          required.
+        required: true
+        content:
+          application/json:
             schema:
-              type: integer
-            required: true
-            description: ID of the event to delete
-        responses:
-          "200":
-            description: Event deleted successfully.
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    message:
-                      type: string
-                      description: Message notifying that the action has been completed successfully.
-                      example: "Event was deleted successfully"
-          "403":
-            description: Authenticated user is not the owner of the event.
-          "404":
-            description: Event does not exist or was not found.
-
+              $ref: '#/components/schemas/RequestEvent'
+      responses:
+        '200':
+          description: Event with the updated information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseEventWithId'
+        '400':
+          description: Any of the specified event fields to modify are not valid.
+        '403':
+          description: >-
+            Authenticated user trying to modify the specified event is not the
+            owner of it.
+        '404':
+          description: Event does not exist or was not found.
+    delete:
+      tags:
+        - Events
+      summary: Deletes an event with matching ID.
+      description: Deletes an event by ID if the authenticated user is the owner of it.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event to delete
+      responses:
+        '200':
+          description: Event deleted successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: >-
+                      Message notifying that the action has been completed
+                      successfully.
+                    example: Event was deleted successfully
+        '403':
+          description: Authenticated user is not the owner of the event.
+        '404':
+          description: Event does not exist or was not found.
   /events/{event_id}/assistances:
     get:
       tags:
@@ -638,20 +666,22 @@ paths:
           required: true
           description: ID of the event
       responses:
-        "200":
+        '200':
           description: List of assistances for the specified event.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListAssistance'
-        "400":
+        '400':
           description: Invalid event ID.
-        "404":
+        '404':
           description: Event does not exist or was not found.
     post:
       tags:
         - Events
-      summary: Creates an assistance of the authenticated user for the event with matching ID.
+      summary: >-
+        Creates an assistance of the authenticated user for the event with
+        matching ID.
       security:
         - BearerAuth: []
       parameters:
@@ -667,9 +697,9 @@ paths:
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestCreateAssistance'
+              $ref: '#/components/schemas/RequestCreateAssistance'
       responses:
-        "200":
+        '200':
           description: Already exists an assistance of the user for the event.
           content:
             application/json:
@@ -680,7 +710,7 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "201":
+        '201':
           description: Assistance created.
           content:
             application/json:
@@ -691,15 +721,18 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "400":
-          description: Invalid event ID, user is trying to join a finished event or event has reached the
-            maximum number of attendants.
-        "404":
+        '400':
+          description: >-
+            Invalid event ID, user is trying to join a finished event or event
+            has reached the maximum number of attendants.
+        '404':
           description: Event does not exist or was not found.
     put:
       tags:
         - Events
-      summary: Edits an assistance of the authenticated user for the event with matching ID.
+      summary: >-
+        Edits an assistance of the authenticated user for the event with
+        matching ID.
       description: An event can only be rated and commented when it has finished.
       security:
         - BearerAuth: []
@@ -711,29 +744,35 @@ paths:
           required: true
           description: ID of the event
       requestBody:
-        description: Assistance information in JSON format. Only the fields to be updated are required.
+        description: >-
+          Assistance information in JSON format. Only the fields to be updated
+          are required.
         required: true
         content:
           application/json:
             schema:
-               $ref: '#/components/schemas/RequestEditAssistance'
+              $ref: '#/components/schemas/RequestEditAssistance'
       responses:
-        "200":
+        '200':
           description: Assistance edited.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseAssistance'
-        "400":
+        '400':
           description: Invalid event ID.
-        "403":
-          description: Event cannot neither be commented or rated because it has not finished yet.
-        "404":
+        '403':
+          description: >-
+            Event cannot neither be commented or rated because it has not
+            finished yet.
+        '404':
           description: Event or assistance does not exist or was not found.
     delete:
       tags:
         - Events
-      summary: Deletes an assistance of the authenticated user for the event with matching ID.
+      summary: >-
+        Deletes an assistance of the authenticated user for the event with
+        matching ID.
       security:
         - BearerAuth: []
       parameters:
@@ -744,17 +783,16 @@ paths:
           required: true
           description: ID of the event
       responses:
-        "200":
+        '200':
           description: Assistance deleted.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseAssistance'
-        "400":
+        '400':
           description: Invalid event ID.
-        "404":
+        '404':
           description: Event or assistance does not exist or was not found.
-
   /events/{event_id}/assistances/{user_id}:
     get:
       tags:
@@ -776,17 +814,16 @@ paths:
           required: true
           description: ID of the user
       responses:
-        "200":
+        '200':
           description: Assistance of a user for an event.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseAssistance'
-        "400":
+        '400':
           description: Invalid event or user ID.
-        "404":
+        '404':
           description: Event or user does not exist or was not found.
-
   /messages:
     post:
       tags:
@@ -805,105 +842,112 @@ paths:
               properties:
                 content:
                   type: string
-                  example: "Hey there! What's up?"
+                  example: Hey there! What's up?
                 receiver_user_id:
                   type: number
                   example: 1
       responses:
-        "201":
+        '201':
           description: Created message.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseMessage'
-        "400":
+        '400':
           description: Authenticated user is trying to send a message to itself.
-        "404":
+        '404':
           description: Receiver of the message does not exist or was not found.
     get:
       tags:
         - Messages
-      summary: Gets all messages exchanged between the authenticated user and an external user.
+      summary: >-
+        Gets all messages exchanged between the authenticated user and an
+        external user.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of messages that form the chat between both users.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListMessage'
-        "400":
+        '400':
           description: Authenticated user is trying to get a chat with itself.
-        "404": 
+        '404':
           description: External user does not exist or was not found.
-
   /messages/users:
     get:
-      tags: 
+      tags:
         - Messages
       summary: Gets all the contacts of the authenticated user.
-      description: Gets all the users that have received or sent a message to the authenticated user.
+      description: >-
+        Gets all the users that have received or sent a message to the
+        authenticated user.
       security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of contacts.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
-
   /friendships/requests:
     get:
       tags:
         - Friendships
-      summary: Gets all the users that have sent a friendship request to the authenticated user and its status is still pending.
-      security: 
+      summary: >-
+        Gets all the users that have sent a friendship request to the
+        authenticated user and its status is still pending.
+      security:
         - BearerAuth: []
       responses:
-        "200":
-          description: List of users that have sent a frienship request to the authenticated user and its status is still pending.
+        '200':
+          description: >-
+            List of users that have sent a frienship request to the
+            authenticated user and its status is still pending.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
-
   /friendships:
     get:
       tags:
         - Friendships
       summary: Gets all friends of the authenticated user.
-      security: 
+      security:
         - BearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of friends of the authenticated user.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListUserWithId'
-
   /friendships/{user_id}:
     post:
       tags:
         - Friendships
       summary: Creates a friend request to an external user from an authenticated user.
-      description: Creates a friend request to an external user. In case the external user has already sent a 
-        friend request to the authenticated user, it is accepted.
-      security: 
+      description: >-
+        Creates a friend request to an external user. In case the external user
+        has already sent a friend request to the authenticated user, it is
+        accepted.
+      security:
         - BearerAuth: []
       parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the external user
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the external user
       responses:
-        "200":
-          description: Message notification informing whether users were already friends, friend request was accepted or
-            was already sent.
+        '200':
+          description: >-
+            Message notification informing whether users were already friends,
+            friend request was accepted or was already sent.
           content:
             application/json:
               schema:
@@ -913,7 +957,7 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "201":
+        '201':
           description: Message notification informing that a friend request has been sent.
           content:
             application/json:
@@ -924,27 +968,29 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "400":
+        '400':
           description: Authenticated user has tried to send a friend request to itself.
-        "404":
+        '404':
           description: External user does not exist or was not found.
     put:
       tags:
         - Friendships
       summary: Accepts a friend request from an external user to an authenticated user.
-      security: 
+      security:
         - BearerAuth: []
       parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the external user
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the external user
       responses:
-        "200":
-          description: Message notification informing whether users were already friends, friend request was accepted or
-            friend request must be accepted by the external user.
+        '200':
+          description: >-
+            Message notification informing whether users were already friends,
+            friend request was accepted or friend request must be accepted by
+            the external user.
           content:
             application/json:
               schema:
@@ -954,28 +1000,34 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "400":
+        '400':
           description: Authenticated user has tried to accept a friend request from itself.
-        "404":
+        '404':
           description: External user does not exist or was not found.
     delete:
       tags:
         - Friendships
-      summary: Deletes a friend request between the authenticated user and the external user.
-      description: Used to delete a friend request regardless of its status or a friendship (when a friend request is accepted).
-        In case exists, it also deletes all the messages exchanged between both users.
-      security: 
+      summary: >-
+        Deletes a friend request between the authenticated user and the external
+        user.
+      description: >-
+        Used to delete a friend request regardless of its status or a friendship
+        (when a friend request is accepted). In case exists, it also deletes all
+        the messages exchanged between both users.
+      security:
         - BearerAuth: []
       parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the external user
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the external user
       responses:
-        "200":
-          description: Message notification informing whether friendship or friend request was deleted.
+        '200':
+          description: >-
+            Message notification informing whether friendship or friend request
+            was deleted.
           content:
             application/json:
               schema:
@@ -985,63 +1037,64 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "400":
+        '400':
           description: Authenticated user has tried to delete a friend request with itself.
-        "404":
+        '404':
           description: External user does not exist or was not found.
-
   /assistances/{user_id}/{event_id}:
     get:
       tags:
         - Assistances
       summary: Gets the assistance of a user for an event.
-      security: 
+      security:
         - BearerAuth: []
       parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the user
-          - in: path
-            name: event_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the event
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
       responses:
-        "200":
+        '200':
           description: Assistance of the specified user for the specified event.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ResponseListAssistance'
-        "400":
+        '400':
           description: User ID or event ID are not valid.
-        "404":
+        '404':
           description: User or event does not exist or was not found.
     delete:
       tags:
         - Assistances
-      summary: Deletes the assistance of a user for an event if the authenticated user is the event owner.
-      security: 
+      summary: >-
+        Deletes the assistance of a user for an event if the authenticated user
+        is the event owner.
+      security:
         - BearerAuth: []
       parameters:
-          - in: path
-            name: user_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the user
-          - in: path
-            name: event_id
-            schema:
-              type: integer
-            required: true
-            description: ID of the event
+        - in: path
+          name: user_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the user
+        - in: path
+          name: event_id
+          schema:
+            type: integer
+          required: true
+          description: ID of the event
       responses:
-        "200":
+        '200':
           description: Assistance has been deleted.
           content:
             application/json:
@@ -1052,13 +1105,12 @@ paths:
                     type: string
                   stacktrace:
                     type: object
-        "400":
+        '400':
           description: User ID or event ID are not valid.
-        "403":
+        '403':
           description: Authenticated user is not the owner of the event.
-        "404":
+        '404':
           description: User or event does not exist or was not found.
-
 components:
   securitySchemes:
     BearerAuth:
@@ -1071,42 +1123,42 @@ components:
         name:
           type: string
           description: Name of the user
-          example: "Jane"
+          example: Jane
         last_name:
           type: string
           description: Last name of the user
-          example: "Doe"
+          example: Doe
         email:
           type: string
           description: Email address of the user
-          example: "janedoe@openevents.com"
+          example: janedoe@openevents.com
         password:
           type: string
           description: Password of the user
-          example: "password"
+          example: password
         image_url:
           type: string
           description: Link URL of the profile image of the user
-          example: "https://i.imgur.com/ghy8Xx1.png"
+          example: https://i.imgur.com/ghy8Xx1.png
     ResponseUser:
       type: object
       properties:
         name:
           type: string
           description: Name of the user
-          example: "Jane"
+          example: Jane
         last_name:
           type: string
           description: Last name of the user
-          example: "Doe"
+          example: Doe
         email:
           type: string
           description: Email address of the user
-          example: "janedoe@openevents.com"
+          example: janedoe@openevents.com
         image_url:
           type: string
           description: Link URL of the profile image of the user
-          example: "https://i.imgur.com/ghy8Xx1.png"
+          example: https://i.imgur.com/ghy8Xx1.png
     ResponseUserStatistics:
       type: object
       properties:
@@ -1131,137 +1183,143 @@ components:
         name:
           type: string
           description: Name of the user
-          example: "Jane"
+          example: Jane
         last_name:
           type: string
           description: Last name of the user
-          example: "Doe"
+          example: Doe
         email:
           type: string
           description: Email address of the user
-          example: "janedoe@openevents.com"
+          example: janedoe@openevents.com
         password:
           type: string
           description: Password of the user encrypted
-          example: "$2b$10$EcKa.b$10$EcKacncGCugnWVb0b$10$EcKaZ75td7D./4UrSugnWZru"
+          example: $2b$10$EcKa.b$10$EcKacncGCugnWVb0b$10$EcKaZ75td7D./4UrSugnWZru
         image_url:
           type: string
           description: Link URL of the profile image of the user
-          example: "https://i.imgur.com/ghy8Xx1.png"
+          example: https://i.imgur.com/ghy8Xx1.png
     ResponseListUserWithId:
       type: array
       items:
         type: object
         properties:
-            id:
-              type: number
-              example: 1
-            name:
-              type: string
-              example: "Jane"
-            last_name:
-              type: string
-              example: "Doe"
-            email:
-              type: string
-              example: "janedoe@openevents.com"
-            image_url:
-              type: string
-              example: "https://i.imgur.com/ghy8Xx1.png"
+          id:
+            type: number
+            example: 1
+          name:
+            type: string
+            example: Jane
+          last_name:
+            type: string
+            example: Doe
+          email:
+            type: string
+            example: janedoe@openevents.com
+          image_url:
+            type: string
+            example: https://i.imgur.com/ghy8Xx1.png
     RequestEvent:
       type: object
       properties:
-          title:
-            type: string
-            example: "Drawing 101: Portraits"
-            description: Title of the event
-          image_url:
-            type: string
-            example: "https://i.imgur.com/JprpLyc.jpg"
-            description: URL of the image of the event.
-          format:
-            type: number
-            example: 1
-            description: Whether the event is online or not. (0 = Face-to-face / 1 = Online)
-          link:
-            type: string
-            example: "https://www.zoom.com/"
-            description: Link to a conference, stream, etc. Optional if the event is face-to-face.
-          location:
-            type: string
-            example: "Barcelona"
-            description: Location of the event
-          description:
-            type: string
-            example: "Learn the basics of portrait drawing with a professional artist 
-              with +10 years of experience"
-            description: Description of the event
-          start_date:
-            type: string
-            example: "2022-07-23 10:00"
-            description: Start date of the event. Must be before the end date.
-          end_date:
-            type: string
-            example: "2022-07-25 10:00"
-            description: End date of the event
-          max_attendees:
-            type: number
-            example: 120
-            description: Max number of face-to-face attendees of the event. Optional if event is online. 
-          ticket_price:
-            type: number
-            example: 4.99
-            description: Ticket price of the event.
-          category: 
-            type: string
-            example: 'Art'
-            description: Category of the event.
+        title:
+          type: string
+          example: 'Drawing 101: Portraits'
+          description: Title of the event
+        image_url:
+          type: string
+          example: https://i.imgur.com/JprpLyc.jpg
+          description: URL of the image of the event.
+        format:
+          type: number
+          example: 1
+          description: Whether the event is online or not. (0 = Face-to-face / 1 = Online)
+        link:
+          type: string
+          example: https://www.zoom.com/
+          description: >-
+            Link to a conference, stream, etc. Optional if the event is
+            face-to-face.
+        location:
+          type: string
+          example: Barcelona
+          description: Location of the event
+        description:
+          type: string
+          example: >-
+            Learn the basics of portrait drawing with a professional artist 
+            with +10 years of experience
+          description: Description of the event
+        start_date:
+          type: string
+          example: 2022-07-23 10:00
+          description: Start date of the event. Must be before the end date.
+        end_date:
+          type: string
+          example: 2022-07-25 10:00
+          description: End date of the event
+        max_attendees:
+          type: number
+          example: 120
+          description: >-
+            Max number of face-to-face attendees of the event. Optional if event
+            is online.
+        ticket_price:
+          type: number
+          example: 4.99
+          description: Ticket price of the event.
+        category:
+          type: string
+          example: Art
+          description: Category of the event.
     ResponseEventWithId:
       type: object
       properties:
-          id:
-            type: number
-            example: 12
-          title:
-            type: string
-            example: "Drawing 101: Portraits"
-          owner_id:
-            type: number
-            example: 1
-          creation_date:
-            type: string
-            example: "2022-07-21T23:26:19.000Z"
-          image_url:
-            type: string
-            example: "https://i.imgur.com/JprpLyc.jpg"
-          format:
-            type: number
-            example: 1
-          link:
-            type: string
-            example: "https://www.zoom.com/"
-          location:
-            type: string
-            example: "Barcelona"
-          description:
-            type: string
-            example: "Learn the basics of portrait drawing with a professional artist 
-              with +10 years of experience"
-          start_date:
-            type: string
-            example: "2022-07-23T08:00:00.000Z"
-          end_date:
-            type: string
-            example: "2022-07-25T08:00:00.000Z"
-          max_attendees:
-            type: number
-            example: 120
-          ticket_price:
-            type: number
-            example: 4.99
-          category: 
-            type: string
-            example: 'Art'
+        id:
+          type: number
+          example: 12
+        title:
+          type: string
+          example: 'Drawing 101: Portraits'
+        owner_id:
+          type: number
+          example: 1
+        creation_date:
+          type: string
+          example: '2022-07-21T23:26:19.000Z'
+        image_url:
+          type: string
+          example: https://i.imgur.com/JprpLyc.jpg
+        format:
+          type: number
+          example: 1
+        link:
+          type: string
+          example: https://www.zoom.com/
+        location:
+          type: string
+          example: Barcelona
+        description:
+          type: string
+          example: >-
+            Learn the basics of portrait drawing with a professional artist 
+            with +10 years of experience
+        start_date:
+          type: string
+          example: '2022-07-23T08:00:00.000Z'
+        end_date:
+          type: string
+          example: '2022-07-25T08:00:00.000Z'
+        max_attendees:
+          type: number
+          example: 120
+        ticket_price:
+          type: number
+          example: 4.99
+        category:
+          type: string
+          example: Art
     ResponseListEventWithId:
       type: array
       items:
@@ -1272,44 +1330,45 @@ components:
             example: 12
           title:
             type: string
-            example: "Drawing 101: Portraits"
+            example: 'Drawing 101: Portraits'
           owner_id:
             type: number
             example: 1
           creation_date:
             type: string
-            example: "2022-07-21T23:26:19.000Z"
+            example: '2022-07-21T23:26:19.000Z'
           image_url:
             type: string
-            example: "https://i.imgur.com/JprpLyc.jpg"
+            example: https://i.imgur.com/JprpLyc.jpg
           format:
             type: number
             example: 1
           link:
             type: string
-            example: "https://www.zoom.com/"
+            example: https://www.zoom.com/
           location:
             type: string
-            example: "Barcelona"
+            example: Barcelona
           description:
             type: string
-            example: "Learn the basics of portrait drawing with a professional artist 
-              with +10 years of experience"
+            example: >-
+              Learn the basics of portrait drawing with a professional artist 
+              with +10 years of experience
           start_date:
             type: string
-            example: "2022-07-23T08:00:00.000Z"
+            example: '2022-07-23T08:00:00.000Z'
           end_date:
             type: string
-            example: "2022-07-25T08:00:00.000Z"
+            example: '2022-07-25T08:00:00.000Z'
           max_attendees:
             type: number
             example: 120
           ticket_price:
             type: number
             example: 4.99
-          category: 
+          category:
             type: string
-            example: 'Art'
+            example: Art
     ResponseMessage:
       type: object
       properties:
@@ -1321,16 +1380,16 @@ components:
           example: 2
         content:
           type: string
-          example: "Hey there! What's up?"
+          example: Hey there! What's up?
         timestamp:
           type: string
-          example: "2022-07-24T12:18:11.470Z"
+          example: '2022-07-24T12:18:11.470Z'
     ResponseListMessage:
       type: array
       items:
         type: object
         properties:
-          id: 
+          id:
             type: number
             example: 1
           sender_user_id:
@@ -1341,23 +1400,23 @@ components:
             example: 2
           content:
             type: string
-            example: "Hey there! What's up?"
+            example: Hey there! What's up?
           timestamp:
             type: string
-            example: "2022-07-24T12:18:11.470Z"
+            example: '2022-07-24T12:18:11.470Z'
     RequestCreateAssistance:
       type: object
       properties:
         format:
           type: string
-          example: "Online"
-          description: Attending format of a user to an event. 
+          example: Online
+          description: Attending format of a user to an event.
     RequestEditAssistance:
       type: object
       properties:
         comment:
           type: string
-          example: "Good music!"
+          example: Good music!
           description: Comment about the event.
         rating:
           type: number
@@ -1377,7 +1436,7 @@ components:
           example: 4
         comment:
           type: string
-          example: "Good music!"
+          example: Good music!
     ResponseListAssistance:
       type: array
       items:
@@ -1394,10 +1453,10 @@ components:
             example: 4
           comment:
             type: string
-            example: "Good music!"
+            example: Good music!
     ResponseListEventWithIdAndAssistance:
       type: array
-      items: 
+      items:
         type: object
         properties:
           id:
@@ -1405,47 +1464,48 @@ components:
             example: 12
           title:
             type: string
-            example: "Drawing 101: Portraits"
+            example: 'Drawing 101: Portraits'
           owner_id:
             type: number
             example: 1
           creation_date:
             type: string
-            example: "2022-07-21T23:26:19.000Z"
+            example: '2022-07-21T23:26:19.000Z'
           image_url:
             type: string
-            example: "https://i.imgur.com/JprpLyc.jpg"
+            example: https://i.imgur.com/JprpLyc.jpg
           format:
             type: number
             example: 1
           link:
             type: string
-            example: "https://www.zoom.com/"
+            example: https://www.zoom.com/
           location:
             type: string
-            example: "Barcelona"
+            example: Barcelona
           description:
             type: string
-            example: "Learn the basics of portrait drawing with a professional artist 
-              with +10 years of experience"
+            example: >-
+              Learn the basics of portrait drawing with a professional artist 
+              with +10 years of experience
           start_date:
             type: string
-            example: "2022-07-23T08:00:00.000Z"
+            example: '2022-07-23T08:00:00.000Z'
           end_date:
             type: string
-            example: "2022-07-25T08:00:00.000Z"
+            example: '2022-07-25T08:00:00.000Z'
           max_attendees:
             type: number
             example: 120
           ticket_price:
             type: number
             example: 4.99
-          category: 
+          category:
             type: string
-            example: 'Art'
+            example: Art
           rating:
             type: number
             example: 5
           comment:
             type: string
-            example: 'Awesome experience!'
+            example: Awesome experience!
